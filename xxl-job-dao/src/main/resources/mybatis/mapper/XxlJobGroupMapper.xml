@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxl.job.dao.mapper.XxlJobGroupMapper">
+
+    <resultMap id="BaseResultMap" type="com.xxl.job.dao.entity.XxlJobGroup">
+        <id column="id" property="id"/>
+        <result column="app_name" property="appName"/>
+        <result column="title" property="title"/>
+        <result column="address_type" property="addressType"/>
+        <result column="address_list" property="addressList"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, app_name, title, address_type, address_list
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from xxl_job_group
+        where id = #{id}
+    </select>
+
+    <insert id="insertSelective" parameterType="com.xxl.job.dao.entity.XxlJobGroup">
+        insert into xxl_job_group
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="appName != null">
+                app_name,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="addressType != null">
+                address_type,
+            </if>
+            <if test="addressList != null">
+                address_list,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="appName != null">
+                #{appName},
+            </if>
+            <if test="title != null">
+                #{title},
+            </if>
+            <if test="addressType != null">
+                #{addressType},
+            </if>
+            <if test="addressList != null">
+                #{addressList},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.xxl.job.dao.entity.XxlJobGroup">
+        update xxl_job_group
+        <set>
+            <if test="appName != null">
+                app_name = #{appName},
+            </if>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="addressType != null">
+                address_type = #{addressType},
+            </if>
+            <if test="addressList != null">
+                address_list = #{addressList},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from xxl_job_group
+        where id = #{id}
+    </delete>
+</mapper>

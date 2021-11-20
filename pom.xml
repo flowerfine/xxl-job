@@ -13,7 +13,8 @@
 	<modules>
 		<module>xxl-job-core</module>
 		<module>xxl-job-admin</module>
-    </modules>
+		<module>xxl-job-dao</module>
+	</modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -44,12 +45,6 @@
 		<maven-war-plugin.version>3.3.1</maven-war-plugin.version>
 	</properties>
 
-	<build>
-		<plugins>
-		</plugins>
-	</build>
-
-
 	<licenses>
 		<license>
 			<name>GNU General Public License version 3</name>
@@ -73,7 +68,6 @@
 	</developers>
 
 	<profiles>
-
 		<profile>
 			<id>release</id>
 			<build>
