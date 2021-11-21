@@ -1,4 +1,4 @@
-package com.xxl.job.admin.core.model;
+package com.xxl.job.dao.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;

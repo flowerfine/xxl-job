@@ -1,15 +1,14 @@
 package com.xxl.job.admin.service.impl;
 
 import com.xxl.job.admin.core.cron.CronExpression;
-import com.xxl.job.admin.core.model.XxlJobGroup;
-import com.xxl.job.admin.core.model.XxlJobInfo;
-import com.xxl.job.admin.core.model.XxlJobLogReport;
+import com.xxl.job.dao.model.XxlJobGroup;
+import com.xxl.job.dao.model.XxlJobInfo;
+import com.xxl.job.dao.model.XxlJobLogReport;
 import com.xxl.job.admin.core.route.ExecutorRouteStrategyEnum;
 import com.xxl.job.admin.core.scheduler.MisfireStrategyEnum;
 import com.xxl.job.admin.core.scheduler.ScheduleTypeEnum;
 import com.xxl.job.admin.core.thread.JobScheduleHelper;
 import com.xxl.job.admin.core.util.I18nUtil;
-import com.xxl.job.admin.dao.*;
 import com.xxl.job.admin.service.XxlJobService;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;

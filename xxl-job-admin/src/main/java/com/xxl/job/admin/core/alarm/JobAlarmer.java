@@ -1,7 +1,7 @@
 package com.xxl.job.admin.core.alarm;
 
-import com.xxl.job.admin.core.model.XxlJobInfo;
-import com.xxl.job.admin.core.model.XxlJobLog;
+import com.xxl.job.dao.model.XxlJobInfo;
+import com.xxl.job.dao.model.XxlJobLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;

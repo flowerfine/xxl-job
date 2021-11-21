@@ -1,4 +1,4 @@
-package com.xxl.job.admin.core.model;
+package com.xxl.job.dao.model;
 
 import org.springframework.util.StringUtils;
 

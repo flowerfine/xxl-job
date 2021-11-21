@@ -1,0 +1,56 @@
+server:
+  port: 8080
+  servlet.context-path: /${spring.application.name}
+
+xxl.job:
+  accessToken:
+  i18n: zh_CN
+  triggerpool.fast.max: 200
+  triggerpool.slow.max: 100
+  logretentiondays: 1
+
+spring:
+  profiles.active: local
+  application.name: xxl-job-admin
+  resources.static-locations: classpath:/static/
+  mvc:
+    servlet.load-on-startup: 0
+    static-path-pattern: /static/**
+  freemarker:
+    templateLoaderPath: classpath:/templates/
+    suffix: .ftl
+    charset: UTF-8
+    request-context-attribute: request
+    settings.number_format: 0.##########
+  mail:
+    host: smtp.qq.com
+    port: 25
+    username: xxx@qq.com
+    password: xxx
+    properties.mail.smtp:
+      auth: true
+      starttls.enable: true
+      starttls.required: true
+      socketFactory.class: javax.net.ssl.SSLSocketFactory
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: root_pwd
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 30
+      auto-commit: true
+      idle-timeout: 30000
+      pool-name: HikariCP
+      max-lifetime: 900000
+      connection-timeout: 10000
+      connection-test-query: SELECT 1
+
+mybatis.mapper-locations: classpath:/mybatis/mapper/*Mapper.xml
+
+management:
+  health.mail.enabled: false
+  endpoints.web.exposure.include: "*"
+  metrics.tags.application: ${spring.application.name}

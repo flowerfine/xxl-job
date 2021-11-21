@@ -2,7 +2,7 @@ package com.xxl.job.admin.core.thread;
 
 import com.xxl.job.admin.core.complete.XxlJobCompleter;
 import com.xxl.job.admin.core.conf.XxlJobAdminConfig;
-import com.xxl.job.admin.core.model.XxlJobLog;
+import com.xxl.job.dao.model.XxlJobLog;
 import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.core.biz.model.HandleCallbackParam;
 import com.xxl.job.core.biz.model.ReturnT;

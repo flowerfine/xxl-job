@@ -2,7 +2,7 @@
 //
 //import com.xxl.job.admin.core.conf.XxlJobAdminConfig;
 //import com.xxl.job.admin.core.jobbean.RemoteHttpJobBean;
-//import com.xxl.job.admin.core.model.XxlJobInfo;
+//import com.xxl.job.dao.model.XxlJobInfo;
 //import com.xxl.job.admin.core.thread.JobFailMonitorHelper;
 //import com.xxl.job.admin.core.thread.JobRegistryMonitorHelper;
 //import com.xxl.job.admin.core.thread.JobTriggerPoolHelper;
