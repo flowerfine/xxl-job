@@ -10,7 +10,7 @@ xxl.job:
   logretentiondays: 1
 
 spring:
-  profiles.active: local
+#  profiles.active: local
   application.name: xxl-job-admin
   resources.static-locations: classpath:/static/
   mvc:
@@ -50,7 +50,7 @@ spring:
       connection-test-query: SELECT 1
       validation-timeout: 1000
 
-mybatis.mapper-locations: classpath:/mybatis/mapper/*Mapper.xml
+mybatis-plus.mapper-locations: "classpath:mybatis/mapper/**/*.xml"
 
 management:
   health.mail.enabled: false
