@@ -1,11 +1,11 @@
 package com.xxl.job.admin.controller;
 
+import com.xxl.job.dao.XxlJobGroupDao;
+import com.xxl.job.dao.XxlJobInfoDao;
+import com.xxl.job.dao.XxlJobRegistryDao;
 import com.xxl.job.dao.model.XxlJobGroup;
 import com.xxl.job.dao.model.XxlJobRegistry;
 import com.xxl.job.admin.core.util.I18nUtil;
-import com.xxl.job.admin.dao.XxlJobGroupDao;
-import com.xxl.job.admin.dao.XxlJobInfoDao;
-import com.xxl.job.admin.dao.XxlJobRegistryDao;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.RegistryConfig;
 import org.springframework.stereotype.Controller;
