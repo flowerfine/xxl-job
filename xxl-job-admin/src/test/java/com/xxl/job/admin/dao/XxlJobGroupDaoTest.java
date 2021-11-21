@@ -1,5 +1,6 @@
 package com.xxl.job.admin.dao;
 
+import com.xxl.job.dao.XxlJobGroupDao;
 import com.xxl.job.dao.model.XxlJobGroup;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

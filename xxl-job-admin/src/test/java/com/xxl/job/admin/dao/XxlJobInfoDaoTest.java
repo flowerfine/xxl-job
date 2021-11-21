@@ -1,5 +1,6 @@
 package com.xxl.job.admin.dao;
 
+import com.xxl.job.dao.XxlJobInfoDao;
 import com.xxl.job.dao.model.XxlJobInfo;
 import com.xxl.job.admin.core.scheduler.MisfireStrategyEnum;
 import com.xxl.job.admin.core.scheduler.ScheduleTypeEnum;

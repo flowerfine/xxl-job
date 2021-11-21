@@ -25,6 +25,7 @@ spring:
   mail:
     host: smtp.qq.com
     port: 25
+    from: xxx@qq.com
     username: xxx@qq.com
     password: xxx
     properties.mail.smtp:
@@ -47,6 +48,7 @@ spring:
       max-lifetime: 900000
       connection-timeout: 10000
       connection-test-query: SELECT 1
+      validation-timeout: 1000
 
 mybatis.mapper-locations: classpath:/mybatis/mapper/*Mapper.xml
 
