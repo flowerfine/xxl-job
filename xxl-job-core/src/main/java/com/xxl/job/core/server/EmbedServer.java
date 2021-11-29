@@ -4,7 +4,7 @@ import com.xxl.job.core.biz.ExecutorBiz;
 import com.xxl.job.core.biz.impl.ExecutorBizImpl;
 import com.xxl.job.core.biz.model.*;
 import com.xxl.job.core.thread.ExecutorRegistryThread;
-import com.xxl.job.core.util.GsonTool;
+import com.xxl.job.core.util.JacksonUtil;
 import com.xxl.job.core.util.ThrowableUtil;
 import com.xxl.job.core.util.XxlJobRemotingUtil;
 import io.netty.bootstrap.ServerBootstrap;
@@ -110,13 +110,13 @@ public class EmbedServer {
             }
 
         });
-        thread.setDaemon(true);	// daemon, service jvm, user thread leave >>> daemon leave >>> jvm leave
+        thread.setDaemon(true);    // daemon, service jvm, user thread leave >>> daemon leave >>> jvm leave
         thread.start();
     }
 
     public void stop() throws Exception {
         // destroy server thread
-        if (thread!=null && thread.isAlive()) {
+        if (thread != null && thread.isAlive()) {
             thread.interrupt();
         }
 
@@ -130,7 +130,7 @@ public class EmbedServer {
 
     /**
      * netty_http
-     *
+     * <p>
      * Copy from : https://github.com/xuxueli/xxl-rpc
      *
      * @author xuxueli 2015-11-24 22:25:15
@@ -141,6 +141,7 @@ public class EmbedServer {
         private ExecutorBiz executorBiz;
         private String accessToken;
         private ThreadPoolExecutor bizThreadPool;
+
         public EmbedHttpServerHandler(ExecutorBiz executorBiz, String accessToken, ThreadPoolExecutor bizThreadPool) {
             this.executorBiz = executorBiz;
             this.accessToken = accessToken;
@@ -162,13 +163,8 @@ public class EmbedServer {
             bizThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {
-                    // do invoke
                     Object responseObj = process(httpMethod, uri, requestData, accessTokenReq);
-
-                    // to json
-                    String responseJson = GsonTool.toJson(responseObj);
-
-                    // write response
+                    String responseJson = JacksonUtil.toJsonString(responseObj);
                     writeResponse(ctx, keepAlive, responseJson);
                 }
             });
@@ -180,11 +176,11 @@ public class EmbedServer {
             if (HttpMethod.POST != httpMethod) {
                 return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, HttpMethod not support.");
             }
-            if (uri==null || uri.trim().length()==0) {
+            if (uri == null || uri.trim().length() == 0) {
                 return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, uri-mapping empty.");
             }
-            if (accessToken!=null
-                    && accessToken.trim().length()>0
+            if (accessToken != null
+                    && accessToken.trim().length() > 0
                     && !accessToken.equals(accessTokenReq)) {
                 return new ReturnT<String>(ReturnT.FAIL_CODE, "The access token is wrong.");
             }
@@ -194,19 +190,19 @@ public class EmbedServer {
                 if ("/beat".equals(uri)) {
                     return executorBiz.beat();
                 } else if ("/idleBeat".equals(uri)) {
-                    IdleBeatParam idleBeatParam = GsonTool.fromJson(requestData, IdleBeatParam.class);
+                    IdleBeatParam idleBeatParam = JacksonUtil.parseJsonString(requestData, IdleBeatParam.class);
                     return executorBiz.idleBeat(idleBeatParam);
                 } else if ("/run".equals(uri)) {
-                    TriggerParam triggerParam = GsonTool.fromJson(requestData, TriggerParam.class);
+                    TriggerParam triggerParam = JacksonUtil.parseJsonString(requestData, TriggerParam.class);
                     return executorBiz.run(triggerParam);
                 } else if ("/kill".equals(uri)) {
-                    KillParam killParam = GsonTool.fromJson(requestData, KillParam.class);
+                    KillParam killParam = JacksonUtil.parseJsonString(requestData, KillParam.class);
                     return executorBiz.kill(killParam);
                 } else if ("/log".equals(uri)) {
-                    LogParam logParam = GsonTool.fromJson(requestData, LogParam.class);
+                    LogParam logParam = JacksonUtil.parseJsonString(requestData, LogParam.class);
                     return executorBiz.log(logParam);
                 } else {
-                    return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, uri-mapping("+ uri +") not found.");
+                    return new ReturnT<String>(ReturnT.FAIL_CODE, "invalid request, uri-mapping(" + uri + ") not found.");
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
