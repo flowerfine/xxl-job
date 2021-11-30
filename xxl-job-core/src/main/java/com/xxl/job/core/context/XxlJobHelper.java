@@ -105,14 +105,8 @@ public class XxlJobHelper {
      * @param appendLogArguments    like "111, true"
      */
     public static boolean log(String appendLogPattern, Object ... appendLogArguments) {
-
         FormattingTuple ft = MessageFormatter.arrayFormat(appendLogPattern, appendLogArguments);
         String appendLog = ft.getMessage();
-
-        /*appendLog = appendLogPattern;
-        if (appendLogArguments!=null && appendLogArguments.length>0) {
-            appendLog = MessageFormat.format(appendLogPattern, appendLogArguments);
-        }*/
 
         StackTraceElement callInfo = new Throwable().getStackTrace()[1];
         return logDetail(callInfo, appendLog);
@@ -144,10 +138,6 @@ public class XxlJobHelper {
         if (xxlJobContext == null) {
             return false;
         }
-
-        /*// "yyyy-MM-dd HH:mm:ss [ClassName]-[MethodName]-[LineNumber]-[ThreadName] log";
-        StackTraceElement[] stackTraceElements = new Throwable().getStackTrace();
-        StackTraceElement callInfo = stackTraceElements[1];*/
 
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(DateUtil.formatDateTime(new Date())).append(" ")
@@ -250,6 +240,5 @@ public class XxlJobHelper {
         }
         return true;
     }
-
 
 }
