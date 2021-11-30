@@ -25,15 +25,6 @@ public class ExecutorRegistryThread {
     private volatile boolean toStop = false;
     public void start(final String appname, final String address){
 
-        // valid
-        if (appname==null || appname.trim().length()==0) {
-            logger.warn(">>>>>>>>>>> xxl-job, executor registry config fail, appname is null.");
-            return;
-        }
-        if (XxlJobExecutor.getAdminBizList() == null) {
-            logger.warn(">>>>>>>>>>> xxl-job, executor registry config fail, adminAddresses is null.");
-            return;
-        }
 
         registryThread = new Thread(new Runnable() {
             @Override
@@ -41,39 +32,8 @@ public class ExecutorRegistryThread {
 
                 // registry
                 while (!toStop) {
-                    try {
-                        RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), appname, address);
-                        for (AdminBiz adminBiz: XxlJobExecutor.getAdminBizList()) {
-                            try {
-                                ReturnT<String> registryResult = adminBiz.registry(registryParam);
-                                if (registryResult!=null && ReturnT.SUCCESS_CODE == registryResult.getCode()) {
-                                    registryResult = ReturnT.SUCCESS;
-                                    logger.debug(">>>>>>>>>>> xxl-job registry success, registryParam:{}, registryResult:{}", new Object[]{registryParam, registryResult});
-                                    break;
-                                } else {
-                                    logger.info(">>>>>>>>>>> xxl-job registry fail, registryParam:{}, registryResult:{}", new Object[]{registryParam, registryResult});
-                                }
-                            } catch (Exception e) {
-                                logger.info(">>>>>>>>>>> xxl-job registry error, registryParam:{}", registryParam, e);
-                            }
 
-                        }
-                    } catch (Exception e) {
-                        if (!toStop) {
-                            logger.error(e.getMessage(), e);
-                        }
 
-                    }
-
-                    try {
-                        if (!toStop) {
-                            TimeUnit.SECONDS.sleep(RegistryConfig.BEAT_TIMEOUT);
-                        }
-                    } catch (InterruptedException e) {
-                        if (!toStop) {
-                            logger.warn(">>>>>>>>>>> xxl-job, executor registry thread interrupted, error msg:{}", e.getMessage());
-                        }
-                    }
                 }
 
                 // registry remove
