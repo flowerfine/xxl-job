@@ -3,6 +3,8 @@ package com.xxl.job.core.executor.impl;
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import com.xxl.job.core.handler.impl.MethodJobHandler;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,21 +16,14 @@ import java.util.Map;
 
 /**
  * xxl-job executor (for frameless)
- *
- * @author xuxueli 2020-11-05
  */
 public class XxlJobSimpleExecutor extends XxlJobExecutor {
+
     private static final Logger logger = LoggerFactory.getLogger(XxlJobSimpleExecutor.class);
 
-
+    @Setter
+    @Getter
     private List<Object> xxlJobBeanList = new ArrayList<>();
-    public List<Object> getXxlJobBeanList() {
-        return xxlJobBeanList;
-    }
-    public void setXxlJobBeanList(List<Object> xxlJobBeanList) {
-        this.xxlJobBeanList = xxlJobBeanList;
-    }
-
 
     public void start() {
 
@@ -75,16 +70,6 @@ public class XxlJobSimpleExecutor extends XxlJobExecutor {
                 if (loadJobHandler(name) != null) {
                     throw new RuntimeException("xxl-job jobhandler[" + name + "] naming conflicts.");
                 }
-
-                // execute method
-                /*if (!(method.getParameterTypes().length == 1 && method.getParameterTypes()[0].isAssignableFrom(String.class))) {
-                    throw new RuntimeException("xxl-job method-jobhandler param-classtype invalid, for[" + bean.getClass() + "#" + method.getName() + "] , " +
-                            "The correct method format like \" public ReturnT<String> execute(String param) \" .");
-                }
-                if (!method.getReturnType().isAssignableFrom(ReturnT.class)) {
-                    throw new RuntimeException("xxl-job method-jobhandler return-classtype invalid, for[" + bean.getClass() + "#" + method.getName() + "] , " +
-                            "The correct method format like \" public ReturnT<String> execute(String param) \" .");
-                }*/
 
                 executeMethod.setAccessible(true);
 

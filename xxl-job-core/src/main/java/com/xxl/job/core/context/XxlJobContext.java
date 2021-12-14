@@ -2,9 +2,6 @@ package com.xxl.job.core.context;
 
 /**
  * xxl-job context
- *
- * @author xuxueli 2020-05-21
- * [Dear hj]
  */
 public class XxlJobContext {
 
@@ -12,54 +9,16 @@ public class XxlJobContext {
     public static final int HANDLE_COCE_FAIL = 500;
     public static final int HANDLE_COCE_TIMEOUT = 502;
 
-    // ---------------------- base info ----------------------
-
-    /**
-     * job id
-     */
     private final long jobId;
-
-    /**
-     * job param
-     */
     private final String jobParam;
 
-    // ---------------------- for log ----------------------
-
-    /**
-     * job log filename
-     */
     private final String jobLogFileName;
 
-    // ---------------------- for shard ----------------------
-
-    /**
-     * shard index
-     */
     private final int shardIndex;
-
-    /**
-     * shard total
-     */
     private final int shardTotal;
 
-    // ---------------------- for handle ----------------------
-
-    /**
-     * handleCode：The result status of job execution
-     *
-     *      200 : success
-     *      500 : fail
-     *      502 : timeout
-     *
-     */
     private int handleCode;
-
-    /**
-     * handleMsg：The simple log msg of job execution
-     */
     private String handleMsg;
-
 
     public XxlJobContext(long jobId, String jobParam, String jobLogFileName, int shardIndex, int shardTotal) {
         this.jobId = jobId;

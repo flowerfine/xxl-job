@@ -5,7 +5,7 @@ import com.xxl.job.core.handler.IJobHandler;
 import java.lang.reflect.Method;
 
 /**
- * @author xuxueli 2019-12-11 21:12:18
+ * Method job handler.
  */
 public class MethodJobHandler extends IJobHandler {
 
@@ -17,7 +17,6 @@ public class MethodJobHandler extends IJobHandler {
     public MethodJobHandler(Object target, Method method, Method initMethod, Method destroyMethod) {
         this.target = target;
         this.method = method;
-
         this.initMethod = initMethod;
         this.destroyMethod = destroyMethod;
     }

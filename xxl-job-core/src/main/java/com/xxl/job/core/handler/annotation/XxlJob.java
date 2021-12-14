@@ -4,8 +4,6 @@ import java.lang.annotation.*;
 
 /**
  * annotation for method jobhandler
- *
- * @author xuxueli 2019-12-11 20:50:13
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
