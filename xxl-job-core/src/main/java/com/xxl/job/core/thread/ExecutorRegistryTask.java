@@ -6,24 +6,18 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.RegistryConfig;
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.util.JacksonUtil;
-import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
-import io.netty.util.concurrent.DefaultThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
-public class ExecutorRegistryTask implements TimerTask {
+public class ExecutorRegistryTask extends AbstractTask {
 
     private static Logger logger = LoggerFactory.getLogger(ExecutorRegistryTask.class);
 
     private final String appname;
     private final String address;
-
-    private HashedWheelTimer timer = new HashedWheelTimer(new DefaultThreadFactory("xxl-job, executor ExecutorRegistryThread"));
-    private volatile boolean toStop = false;
 
     public ExecutorRegistryTask(String appname, String address) {
         if (appname == null || appname.trim().length() == 0) {
@@ -37,11 +31,22 @@ public class ExecutorRegistryTask implements TimerTask {
     }
 
     @Override
+    protected String getThreadName() {
+        return "xxl-job, executor ExecutorRegistryThread";
+    }
+
+    @Override
     public void run(Timeout timeout) throws Exception {
         registry();
         if (isActive()) {
             timeout.timer().newTimeout(this, RegistryConfig.BEAT_TIMEOUT, TimeUnit.SECONDS);
         }
+    }
+
+    @Override
+    public void toStop() {
+        super.toStop();
+        remove();
     }
 
     private void registry() {
@@ -101,16 +106,4 @@ public class ExecutorRegistryTask implements TimerTask {
         logger.info(">>>>>>>>>>> xxl-job, executor registry thread destory.");
     }
 
-    public void start() {
-        timer.newTimeout(this, 100, TimeUnit.MILLISECONDS);
-    }
-
-    public void toStop() {
-        toStop = true;
-        remove();
-    }
-
-    private boolean isActive() {
-        return toStop == false;
-    }
 }

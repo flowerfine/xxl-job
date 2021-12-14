@@ -4,7 +4,6 @@ import com.xxl.job.core.biz.ExecutorBiz;
 import com.xxl.job.core.biz.impl.ExecutorBizImpl;
 import com.xxl.job.core.biz.model.*;
 import com.xxl.job.core.thread.ExecutorRegistryTask;
-import com.xxl.job.core.thread.ExecutorRegistryThread;
 import com.xxl.job.core.util.JacksonUtil;
 import com.xxl.job.core.util.ThrowableUtil;
 import com.xxl.job.core.util.XxlJobRemotingUtil;
@@ -245,9 +244,7 @@ public class EmbedServer {
     }
 
     // ---------------------- registry ----------------------
-
     public void startRegistry(final String appname, final String address) {
-        // start registry
         executorRegistryTask = new ExecutorRegistryTask(appname, address);
         executorRegistryTask.start();
     }
