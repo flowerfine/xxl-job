@@ -14,12 +14,13 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 /**
- * @author xuxueli 2018-11-25 00:55:31
+ * Remote util.
  */
 public class XxlJobRemotingUtil {
-    private static Logger logger = LoggerFactory.getLogger(XxlJobRemotingUtil.class);
-    public static final String XXL_JOB_ACCESS_TOKEN = "XXL-JOB-ACCESS-TOKEN";
 
+    private static Logger logger = LoggerFactory.getLogger(XxlJobRemotingUtil.class);
+
+    public static final String XXL_JOB_ACCESS_TOKEN = "XXL-JOB-ACCESS-TOKEN";
 
     // trust-https start
     private static void trustAllHosts(HttpsURLConnection connection) {
@@ -52,17 +53,6 @@ public class XxlJobRemotingUtil {
     }};
     // trust-https end
 
-
-    /**
-     * post
-     *
-     * @param url
-     * @param accessToken
-     * @param timeout
-     * @param requestObj
-     * @param returnTargClassOfT
-     * @return
-     */
     public static ReturnT postBody(String url, String accessToken, int timeout, Object requestObj, Class returnTargClassOfT) {
         HttpURLConnection connection = null;
         BufferedReader bufferedReader = null;
@@ -105,13 +95,6 @@ public class XxlJobRemotingUtil {
                 dataOutputStream.flush();
                 dataOutputStream.close();
             }
-
-            /*byte[] requestBodyBytes = requestBody.getBytes("UTF-8");
-            connection.setRequestProperty("Content-Length", String.valueOf(requestBodyBytes.length));
-            OutputStream outwritestream = connection.getOutputStream();
-            outwritestream.write(requestBodyBytes);
-            outwritestream.flush();
-            outwritestream.close();*/
 
             // valid StatusCode
             int statusCode = connection.getResponseCode();

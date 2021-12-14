@@ -6,19 +6,14 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 
 /**
- * @author xuxueli 2020-04-12 0:14:00
+ * Serialize tool by jdk
  */
 public class JdkSerializeTool {
+
     private static Logger logger = LoggerFactory.getLogger(JdkSerializeTool.class);
-
-
-    // ------------------------ serialize and unserialize ------------------------
 
     /**
      * 将对象-->byte[] (由于jedis中不支持直接存储object所以转换成byte[]存入)
-     *
-     * @param object
-     * @return
      */
     public static byte[] serialize(Object object) {
         ObjectOutputStream oos = null;
@@ -46,11 +41,8 @@ public class JdkSerializeTool {
 
     /**
      * 将byte[] -->Object
-     *
-     * @param bytes
-     * @return
      */
-    public static  <T> Object deserialize(byte[] bytes, Class<T> clazz) {
+    public static <T> Object deserialize(byte[] bytes, Class<T> clazz) {
         ByteArrayInputStream bais = null;
         try {
             // 反序列化

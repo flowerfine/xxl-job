@@ -8,18 +8,11 @@ import java.net.ServerSocket;
 
 /**
  * net util
- *
- * @author xuxueli 2017-11-29 17:00:25
  */
 public class NetUtil {
+
     private static Logger logger = LoggerFactory.getLogger(NetUtil.class);
 
-    /**
-     * find avaliable port
-     *
-     * @param defaultPort
-     * @return
-     */
     public static int findAvailablePort(int defaultPort) {
         int portTmp = defaultPort;
         while (portTmp < 65535) {
@@ -40,12 +33,6 @@ public class NetUtil {
         throw new RuntimeException("no available port.");
     }
 
-    /**
-     * check port used
-     *
-     * @param port
-     * @return
-     */
     public static boolean isPortUsed(int port) {
         boolean used = false;
         ServerSocket serverSocket = null;

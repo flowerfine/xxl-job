@@ -10,19 +10,10 @@ import java.io.IOException;
 
 /**
  * file tool
- *
- * @author xuxueli 2017-12-29 17:56:48
  */
 public class FileUtil {
     private static Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
-
-    /**
-     * delete recursively
-     *
-     * @param root
-     * @return
-     */
     public static boolean deleteRecursively(File root) {
         if (root != null && root.exists()) {
             if (root.isDirectory()) {
@@ -37,7 +28,6 @@ public class FileUtil {
         }
         return false;
     }
-
 
     public static void deleteFile(String fileName) {
         // file
