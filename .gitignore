@@ -2,6 +2,7 @@
 .classpath
 .project
 *.iml
+.vscode
 target/
 .DS_Store
 .gitattributes
