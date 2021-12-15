@@ -11,9 +11,9 @@
 	<url>https://www.xuxueli.com/</url>
 
 	<modules>
+		<module>xxl-job-dao</module>
 		<module>xxl-job-core</module>
 		<module>xxl-job-admin</module>
-		<module>xxl-job-dao</module>
 		<module>xxl-job-spring-boot-autoconfigure</module>
 		<module>xxl-job-spring-boot-starter</module>
 	</modules>

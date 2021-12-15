@@ -3,11 +3,13 @@ package com.xxl.job.spring.boot.autoconfigure;
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -16,12 +18,11 @@ import java.util.List;
 @EnableConfigurationProperties(XxlJobProperties.class)
 public class XxlJobAutoConfiguration {
 
-    private final XxlJobProperties properties;
+    @Autowired
+    private XxlJobProperties properties;
     private final List<XxlJobExecutorCustomizer> customizers;
 
-    public XxlJobAutoConfiguration(XxlJobProperties properties,
-                                   ObjectProvider<List<XxlJobExecutorCustomizer>> xxlJobExecutorCustomizersProvider) {
-        this.properties = properties;
+    public XxlJobAutoConfiguration(ObjectProvider<List<XxlJobExecutorCustomizer>> xxlJobExecutorCustomizersProvider) {
         this.customizers = xxlJobExecutorCustomizersProvider.getIfAvailable();
     }
 
@@ -31,10 +32,14 @@ public class XxlJobAutoConfiguration {
         XxlJobSpringExecutor xxlJobSpringExecutor = new XxlJobSpringExecutor();
         xxlJobSpringExecutor.setAdminAddresses(properties.getAdminAddresses());
         xxlJobSpringExecutor.setAppname(properties.getExecutorAppName());
-        xxlJobSpringExecutor.setPort(properties.getExecutorPort());
+        if (properties.getExecutorPort() != null) {
+            xxlJobSpringExecutor.setPort(properties.getExecutorPort());
+        }
         xxlJobSpringExecutor.setLogPath(System.getProperty("user.home") + "/logs/jobhandler");
         xxlJobSpringExecutor.setLogRetentionDays(7);
-        customizers.forEach(customizer -> customizer.customize(xxlJobSpringExecutor));
+        if (CollectionUtils.isEmpty(customizers) == false) {
+            customizers.forEach(customizer -> customizer.customize(xxlJobSpringExecutor));
+        }
         return xxlJobSpringExecutor;
     }
 }
