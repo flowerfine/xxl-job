@@ -1,5 +1,8 @@
 package com.xxl.job.core.executor;
 
+import akka.actor.typed.ActorSystem;
+import akka.actor.typed.SpawnProtocol;
+import akka.actor.typed.javadsl.Behaviors;
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.client.AdminBizClient;
 import com.xxl.job.core.handler.IJobHandler;
@@ -26,6 +29,8 @@ import java.util.concurrent.ConcurrentMap;
 public class XxlJobExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(XxlJobExecutor.class);
+
+    private ActorSystem<SpawnProtocol.Command> actorSystem;
 
     private JobLogFileCleanTask jobLogFileCleanTask;
 
@@ -73,6 +78,8 @@ public class XxlJobExecutor {
 
     // ---------------------- start + stop ----------------------
     public void start() throws Exception {
+        actorSystem = ActorSystem.create(Behaviors.setup(ctx -> SpawnProtocol.create()), "xxl-job");
+
         // init logpath
         XxlJobFileAppender.initLogPath(logPath);
 
@@ -91,6 +98,15 @@ public class XxlJobExecutor {
     }
 
     public void destroy() {
+        actorSystem.terminate();
+        actorSystem.whenTerminated().onComplete(done -> {
+            if (done.isSuccess()) {
+                actorSystem.log().info("ActorSystem terminate success!");
+            } else {
+                actorSystem.log().error("ActorSystem terminate failure!", done.failed().get());
+            }
+            return done.get();
+        }, actorSystem.executionContext());
         // destory executor-server
         stopEmbedServer();
 
