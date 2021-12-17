@@ -1,7 +1,6 @@
 package com.xxl.job.core.thread;
 
 import com.xxl.job.core.biz.AdminBiz;
-import com.xxl.job.core.biz.model.HandleCallbackParam;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.context.XxlJobContext;
 import com.xxl.job.core.context.XxlJobHelper;
@@ -10,6 +9,7 @@ import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.log.XxlJobFileAppender;
 import com.xxl.job.core.util.FileUtil;
 import com.xxl.job.core.util.JdkSerializeTool;
+import com.xxl.job.remote.protocol.request.HandleCallbackParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +20,6 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by xuxueli on 16/7/22.
- */
 public class TriggerCallbackThread {
     private static Logger logger = LoggerFactory.getLogger(TriggerCallbackThread.class);
 

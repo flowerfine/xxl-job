@@ -1,13 +1,13 @@
 package com.xxl.job.core.thread;
 
-import com.xxl.job.core.biz.model.HandleCallbackParam;
-import com.xxl.job.core.biz.model.ReturnT;
-import com.xxl.job.core.biz.model.TriggerParam;
 import com.xxl.job.core.context.XxlJobContext;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.log.XxlJobFileAppender;
+import com.xxl.job.remote.protocol.ReturnT;
+import com.xxl.job.remote.protocol.request.HandleCallbackParam;
+import com.xxl.job.remote.protocol.request.TriggerParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,6 @@ public class JobThread extends Thread {
     private boolean running = false;    // if running job
     private int idleTimes = 0;            // idel times
 
-
     public JobThread(int jobId, IJobHandler handler) {
         this.jobId = jobId;
         this.handler = handler;
@@ -51,15 +50,12 @@ public class JobThread extends Thread {
 
     /**
      * new trigger to queue
-     *
-     * @param triggerParam
-     * @return
      */
     public ReturnT<String> pushTriggerQueue(TriggerParam triggerParam) {
         // avoid repeat
         if (triggerLogIdSet.contains(triggerParam.getLogId())) {
             logger.info(">>>>>>>>>>> repeate trigger job, logId:{}", triggerParam.getLogId());
-            return new ReturnT<String>(ReturnT.FAIL_CODE, "repeate trigger job, logId:" + triggerParam.getLogId());
+            return new ReturnT(ReturnT.FAIL_CODE, "repeate trigger job, logId:" + triggerParam.getLogId());
         }
 
         triggerLogIdSet.add(triggerParam.getLogId());
@@ -69,8 +65,6 @@ public class JobThread extends Thread {
 
     /**
      * kill job thread
-     *
-     * @param stopReason
      */
     public void toStop(String stopReason) {
         /**

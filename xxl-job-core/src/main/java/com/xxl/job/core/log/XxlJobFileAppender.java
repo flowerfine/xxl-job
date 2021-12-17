@@ -1,6 +1,6 @@
 package com.xxl.job.core.log;
 
-import com.xxl.job.core.biz.model.LogResult;
+import com.xxl.job.remote.protocol.response.LogResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
