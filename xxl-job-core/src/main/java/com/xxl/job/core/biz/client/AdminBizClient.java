@@ -1,12 +1,12 @@
 package com.xxl.job.core.biz.client;
 
+import java.util.List;
+
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.model.HandleCallbackParam;
 import com.xxl.job.core.biz.model.RegistryParam;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.util.XxlJobRemotingUtil;
-
-import java.util.List;
 
 public class AdminBizClient implements AdminBiz {
 
@@ -15,7 +15,7 @@ public class AdminBizClient implements AdminBiz {
     private int timeout = 3;
 
     public AdminBizClient(String addressUrl, String accessToken) {
-        if (!this.addressUrl.endsWith("/")) {
+        if (!addressUrl.endsWith("/")) {
             this.addressUrl = this.addressUrl + "/";
         } else {
             this.addressUrl = addressUrl;

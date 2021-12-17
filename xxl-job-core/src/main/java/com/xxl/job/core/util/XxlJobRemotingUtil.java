@@ -113,7 +113,7 @@ public class XxlJobRemotingUtil {
 
             // parse returnT
             try {
-                return JacksonUtil.parseJsonString(resultJson, ReturnT.class);
+                return JacksonUtil.parseJsonString(resultJson, ReturnT.class, returnTargClassOfT);
             } catch (Exception e) {
                 logger.error("xxl-rpc remoting (url=" + url + ") response content invalid(" + resultJson + ").", e);
                 return new ReturnT<String>(ReturnT.FAIL_CODE, "xxl-rpc remoting (url=" + url + ") response content invalid(" + resultJson + ").");

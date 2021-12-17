@@ -1,8 +1,14 @@
 package com.xxl.job.core.executor;
 
-import akka.actor.typed.ActorSystem;
-import akka.actor.typed.SpawnProtocol;
-import akka.actor.typed.javadsl.Behaviors;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.client.AdminBizClient;
 import com.xxl.job.core.handler.IJobHandler;
@@ -13,15 +19,13 @@ import com.xxl.job.core.thread.JobThread;
 import com.xxl.job.core.thread.TriggerCallbackThread;
 import com.xxl.job.core.util.IpUtil;
 import com.xxl.job.core.util.NetUtil;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import akka.actor.typed.ActorSystem;
+import akka.actor.typed.SpawnProtocol;
+import akka.actor.typed.javadsl.Behaviors;
 
 /**
  * xxl-job executor.
@@ -75,10 +79,10 @@ public class XxlJobExecutor {
         this.logRetentionDays = logRetentionDays;
     }
 
-
     // ---------------------- start + stop ----------------------
     public void start() throws Exception {
-        actorSystem = ActorSystem.create(Behaviors.setup(ctx -> SpawnProtocol.create()), "xxl-job");
+        Config config = ConfigFactory.load("xxl-job.conf");
+        actorSystem = ActorSystem.create(Behaviors.setup(ctx -> SpawnProtocol.create()), "xxl-job", config);
 
         // init logpath
         XxlJobFileAppender.initLogPath(logPath);
@@ -127,7 +131,6 @@ public class XxlJobExecutor {
         }
         jobHandlerRepository.clear();
 
-
         // destory JobLogFileCleanThread
         jobLogFileCleanTask.toStop();
 
@@ -135,7 +138,6 @@ public class XxlJobExecutor {
         TriggerCallbackThread.getInstance().toStop();
 
     }
-
 
     // ---------------------- admin-client (rpc invoker) ----------------------
     private static List<AdminBiz> adminBizList;
@@ -163,7 +165,8 @@ public class XxlJobExecutor {
     // ---------------------- executor-server (rpc provider) ----------------------
     private EmbedServer embedServer = null;
 
-    private void initEmbedServer(String address, String ip, int port, String appname, String accessToken) throws Exception {
+    private void initEmbedServer(String address, String ip, int port, String appname, String accessToken)
+            throws Exception {
 
         // fill ip port
         port = port > 0 ? port : NetUtil.findAvailablePort(9999);
@@ -171,13 +174,15 @@ public class XxlJobExecutor {
 
         // generate address
         if (address == null || address.trim().length() == 0) {
-            String ip_port_address = IpUtil.getIpPort(ip, port);   // registry-address：default use address to registry , otherwise use ip:port if address is null
+            String ip_port_address = IpUtil.getIpPort(ip, port); // registry-address：default use address to registry ,
+                                                                 // otherwise use ip:port if address is null
             address = "http://{ip_port}/".replace("{ip_port}", ip_port_address);
         }
 
         // accessToken
         if (accessToken == null || accessToken.trim().length() == 0) {
-            logger.warn(">>>>>>>>>>> xxl-job accessToken is empty. To ensure system security, please set the accessToken.");
+            logger.warn(
+                    ">>>>>>>>>>> xxl-job accessToken is empty. To ensure system security, please set the accessToken.");
         }
 
         // start
@@ -196,7 +201,6 @@ public class XxlJobExecutor {
         }
     }
 
-
     // ---------------------- job handler repository ----------------------
     private static ConcurrentMap<String, IJobHandler> jobHandlerRepository = new ConcurrentHashMap<String, IJobHandler>();
 
@@ -209,16 +213,17 @@ public class XxlJobExecutor {
         return jobHandlerRepository.put(name, jobHandler);
     }
 
-
     // ---------------------- job thread repository ----------------------
     private static ConcurrentMap<Integer, JobThread> jobThreadRepository = new ConcurrentHashMap<Integer, JobThread>();
 
     public static JobThread registJobThread(int jobId, IJobHandler handler, String removeOldReason) {
         JobThread newJobThread = new JobThread(jobId, handler);
         newJobThread.start();
-        logger.info(">>>>>>>>>>> xxl-job regist JobThread success, jobId:{}, handler:{}", new Object[]{jobId, handler});
+        logger.info(">>>>>>>>>>> xxl-job regist JobThread success, jobId:{}, handler:{}",
+                new Object[] { jobId, handler });
 
-        JobThread oldJobThread = jobThreadRepository.put(jobId, newJobThread);    // putIfAbsent | oh my god, map's put method return the old value!!!
+        JobThread oldJobThread = jobThreadRepository.put(jobId, newJobThread); // putIfAbsent | oh my god, map's put
+                                                                               // method return the old value!!!
         if (oldJobThread != null) {
             oldJobThread.toStop(removeOldReason);
             oldJobThread.interrupt();

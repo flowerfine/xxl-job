@@ -1,18 +1,20 @@
 package com.xxl.job.admin.service;
 
-import com.xxl.job.admin.core.util.CookieUtil;
-import com.xxl.job.admin.core.util.I18nUtil;
-import com.xxl.job.admin.core.util.JacksonUtil;
-import com.xxl.job.core.biz.model.ReturnT;
-import com.xxl.job.dao.XxlJobUserDao;
-import com.xxl.job.dao.model.XxlJobUser;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.util.DigestUtils;
+import java.math.BigInteger;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.math.BigInteger;
+
+import com.xxl.job.admin.core.util.CookieUtil;
+import com.xxl.job.admin.core.util.I18nUtil;
+import com.xxl.job.core.biz.model.ReturnT;
+import com.xxl.job.core.util.JacksonUtil;
+import com.xxl.job.dao.XxlJobUserDao;
+import com.xxl.job.dao.model.XxlJobUser;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.util.DigestUtils;
 
 /**
  * @author xuxueli 2019-05-04 22:13:264
@@ -26,7 +28,7 @@ public class LoginService {
     private XxlJobUserDao xxlJobUserDao;
 
     private String makeToken(XxlJobUser xxlJobUser) {
-        String tokenJson = JacksonUtil.writeValueAsString(xxlJobUser);
+        String tokenJson = JacksonUtil.toJsonString(xxlJobUser);
         String tokenHex = new BigInteger(tokenJson.getBytes()).toString(16);
         return tokenHex;
     }
@@ -35,7 +37,7 @@ public class LoginService {
         XxlJobUser xxlJobUser = null;
         if (tokenHex != null) {
             String tokenJson = new String(new BigInteger(tokenHex, 16).toByteArray());      // username_password(md5)
-            xxlJobUser = JacksonUtil.readValue(tokenJson, XxlJobUser.class);
+            xxlJobUser = JacksonUtil.parseJsonString(tokenJson, XxlJobUser.class);
         }
         return xxlJobUser;
     }

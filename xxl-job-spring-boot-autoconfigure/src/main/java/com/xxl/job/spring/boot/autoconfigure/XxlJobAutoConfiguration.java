@@ -1,7 +1,10 @@
 package com.xxl.job.spring.boot.autoconfigure;
 
+import java.util.List;
+
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -10,8 +13,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
-
-import java.util.List;
 
 @Configuration
 @ConditionalOnClass(XxlJobSpringExecutor.class)

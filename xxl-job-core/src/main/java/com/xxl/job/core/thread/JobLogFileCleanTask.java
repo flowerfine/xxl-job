@@ -1,17 +1,23 @@
 package com.xxl.job.core.thread;
 
-import com.xxl.job.core.log.XxlJobFileAppender;
-import io.netty.util.Timeout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
+
+import com.xxl.job.core.log.XxlJobFileAppender;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.netty.util.Timeout;
 
 public class JobLogFileCleanTask extends AbstractTask {
 
@@ -53,8 +59,11 @@ public class JobLogFileCleanTask extends AbstractTask {
 
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    if (dir.toAbsolutePath().equals(logPath.toAbsolutePath())) {
+                        return FileVisitResult.CONTINUE;
+                    }
                     boolean isEmpty = Files.list(dir).findAny().isPresent();
-                    if (isEmpty) {
+                    if (isEmpty == false) {
                         Files.deleteIfExists(dir);
                     }
                     return FileVisitResult.CONTINUE;

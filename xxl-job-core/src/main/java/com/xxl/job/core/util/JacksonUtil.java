@@ -1,22 +1,24 @@
 package com.xxl.job.core.util;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.CollectionType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class JacksonUtil {
 
@@ -58,6 +60,17 @@ public class JacksonUtil {
             throw new RuntimeException(e);
         }
     }
+
+    public static <T> T parseJsonString(String json, Class<T> outerType, Class innerType) {
+        try {
+            JavaType type = objectMapper.getTypeFactory().constructParametricType(outerType, innerType);
+            return objectMapper.readValue(json, type);
+        } catch (JsonProcessingException e) {
+            log.error("json 反序列化失败 outerType: {}, innerType: {}, json: {}",
+                    outerType.getName(), innerType.getName(), json, e);
+            throw new RuntimeException(e);
+        }
+    } 
 
     @NonNull
     public static <T> List<T> parseJsonArray(String json, Class<T> clazz) {

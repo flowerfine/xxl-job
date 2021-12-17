@@ -1,7 +1,12 @@
 package com.xxl.job.core.biz.client;
 
 import com.xxl.job.core.biz.ExecutorBiz;
-import com.xxl.job.core.biz.model.*;
+import com.xxl.job.core.biz.model.IdleBeatParam;
+import com.xxl.job.core.biz.model.KillParam;
+import com.xxl.job.core.biz.model.LogParam;
+import com.xxl.job.core.biz.model.LogResult;
+import com.xxl.job.core.biz.model.ReturnT;
+import com.xxl.job.core.biz.model.TriggerParam;
 import com.xxl.job.core.util.XxlJobRemotingUtil;
 
 public class ExecutorBizClient implements ExecutorBiz {
@@ -11,7 +16,7 @@ public class ExecutorBizClient implements ExecutorBiz {
     private int timeout = 3;
 
     public ExecutorBizClient(String addressUrl, String accessToken) {
-        if (!this.addressUrl.endsWith("/")) {
+        if (!addressUrl.endsWith("/")) {
             this.addressUrl = this.addressUrl + "/";
         } else {
             this.addressUrl = addressUrl;
