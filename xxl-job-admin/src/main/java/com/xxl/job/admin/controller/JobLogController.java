@@ -137,14 +137,16 @@ public class JobLogController {
         model.addAttribute("executorAddress", jobLog.getExecutorAddress());
         model.addAttribute("triggerTime", jobLog.getTriggerTime().getTime());
         model.addAttribute("logId", jobLog.getId());
+        model.addAttribute("jobGroup", jobLog.getJobGroup());
         return "joblog/joblog.detail";
     }
 
     @RequestMapping("/logDetailCat")
     @ResponseBody
-    public ReturnT<LogResult> logDetailCat(String appname, long logId, String executorAddress, long triggerTime, int fromLineNum) {
+    public ReturnT<LogResult> logDetailCat(int jobGroup, long logId, String executorAddress, long triggerTime, int fromLineNum) {
         try {
-            ExecutorService executorBiz = XxlJobScheduler.getExecutorBiz(appname, executorAddress);
+            XxlJobGroup group = xxlJobGroupDao.load(jobGroup);
+            ExecutorService executorBiz = XxlJobScheduler.getExecutorBiz(group.getAppname(), executorAddress);
             ReturnT<LogResult> logResult = executorBiz.log(new LogParam(triggerTime, logId, fromLineNum));
             // is end
             if (logResult.getContent() != null
@@ -164,7 +166,7 @@ public class JobLogController {
 
     @RequestMapping("/logKill")
     @ResponseBody
-    public ReturnT<String> logKill(String appname, int id) {
+    public ReturnT<String> logKill(int jobGroup, int id) {
         // base check
         XxlJobLog log = xxlJobLogDao.load(id);
         XxlJobInfo jobInfo = xxlJobInfoDao.loadById(log.getJobId());
@@ -178,7 +180,9 @@ public class JobLogController {
         // request of kill
         ReturnT<String> runResult = null;
         try {
-            ExecutorService executorBiz = XxlJobScheduler.getExecutorBiz(appname, log.getExecutorAddress());
+
+            XxlJobGroup group = xxlJobGroupDao.load(jobGroup);
+            ExecutorService executorBiz = XxlJobScheduler.getExecutorBiz(group.getAppname(), log.getExecutorAddress());
             runResult = executorBiz.kill(new KillParam(jobInfo.getId()));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

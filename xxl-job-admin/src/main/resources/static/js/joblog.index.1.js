@@ -278,7 +278,10 @@ $(function() {
             $.ajax({
                 type : 'POST',
                 url : base_url + '/joblog/logKill',
-                data : {"id":_id},
+                data : {
+					"jobGroup":jobGroup,
+                	"id":_id
+				},
                 dataType : "json",
                 success : function(data){
                     if (data.code == 200) {
