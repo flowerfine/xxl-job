@@ -6,8 +6,8 @@ import com.xxl.job.dao.model.XxlJobLog;
 import com.xxl.job.admin.core.thread.JobTriggerPoolHelper;
 import com.xxl.job.admin.core.trigger.TriggerTypeEnum;
 import com.xxl.job.admin.core.util.I18nUtil;
-import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.context.XxlJobContext;
+import com.xxl.job.remote.protocol.ReturnT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

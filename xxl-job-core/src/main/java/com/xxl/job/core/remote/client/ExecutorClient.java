@@ -12,7 +12,6 @@ import com.xxl.job.core.server.AkkaServer;
 import com.xxl.job.core.server.ServiceKeyHelper;
 import com.xxl.job.remote.ActorSelectionHelper;
 import com.xxl.job.remote.ExecutorService;
-import com.xxl.job.remote.protocol.Request;
 import com.xxl.job.remote.protocol.ReturnT;
 import com.xxl.job.remote.protocol.request.IdleBeatParam;
 import com.xxl.job.remote.protocol.request.KillParam;
@@ -25,7 +24,6 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 public class ExecutorClient extends AbstractBehavior<ExecutorClient.Command> implements ExecutorService {
 
@@ -33,15 +31,12 @@ public class ExecutorClient extends AbstractBehavior<ExecutorClient.Command> imp
     private HashMap<String, String> executorRouterPathMap = new HashMap<>(8);
 
     private String appname;
-    private String accessToken;
-    private int timeout = 3;
 
     private Set<ActorRef<AkkaServer.Command>> executors;
 
-    public ExecutorClient(ActorContext<Command> context, String appname, String accessToken, String executorHost) {
+    public ExecutorClient(ActorContext<Command> context, String appname, String executorHost) {
         super(context);
         this.appname = appname;
-        this.accessToken = accessToken;
 
         this.serviceKey = ServiceKeyHelper.getServiceKey(AkkaServer.Command.class, appname);
         executorRouterPathMap.put("beat", ActorSelectionHelper.getExecutorRouterPath(executorHost, "beat"));
@@ -62,6 +57,7 @@ public class ExecutorClient extends AbstractBehavior<ExecutorClient.Command> imp
     @Override
     public Receive<Command> createReceive() {
         return newReceiveBuilder()
+                .onMessage(ListingWrapper.class, this::onListing)
                 .build();
     }
 
@@ -82,36 +78,107 @@ public class ExecutorClient extends AbstractBehavior<ExecutorClient.Command> imp
                     (returnT, throwable) -> {
                         if (throwable != null) {
                             future.completeExceptionally(throwable);
-                            return new ReturnTWrapper(throwable);
                         } else {
                             future.complete(returnT);
-                            return new ReturnTWrapper(returnT);
                         }
+                        return null;
                     });
             return future.get();
         } catch (Exception e) {
-         return new ReturnT(ReturnT.FAIL_CODE, e.getMessage());
+            return new ReturnT(ReturnT.FAIL_CODE, e.getMessage());
         }
     }
 
     @Override
     public ReturnT<String> idleBeat(IdleBeatParam idleBeatParam) {
-        return null;
+        try {
+            ActorRef<AkkaServer.Command> actorRef = getExecutorInstance();
+            CompletableFuture<ReturnT<String>> future = new CompletableFuture<>();
+            getContext().askWithStatus(ReturnT.class,
+                    actorRef,
+                    Duration.ofSeconds(30L),
+                    reply -> new AkkaServer.IdleBeatCommand(idleBeatParam, reply),
+                    (returnT, throwable) -> {
+                        if (throwable != null) {
+                            future.completeExceptionally(throwable);
+                        } else {
+                            future.complete(returnT);
+                        }
+                        return null;
+                    });
+            return future.get();
+        } catch (Exception e) {
+            return new ReturnT(ReturnT.FAIL_CODE, e.getMessage());
+        }
     }
 
     @Override
     public ReturnT<String> run(TriggerParam triggerParam) {
-        return null;
+        try {
+            ActorRef<AkkaServer.Command> actorRef = getExecutorInstance();
+            CompletableFuture<ReturnT<String>> future = new CompletableFuture<>();
+            getContext().askWithStatus(ReturnT.class,
+                    actorRef,
+                    Duration.ofSeconds(30L),
+                    reply -> new AkkaServer.RunCommand(triggerParam, reply),
+                    (returnT, throwable) -> {
+                        if (throwable != null) {
+                            future.completeExceptionally(throwable);
+                        } else {
+                            future.complete(returnT);
+                        }
+                        return null;
+                    });
+            return future.get();
+        } catch (Exception e) {
+            return new ReturnT(ReturnT.FAIL_CODE, e.getMessage());
+        }
     }
 
     @Override
     public ReturnT<String> kill(KillParam killParam) {
-        return null;
+        try {
+            ActorRef<AkkaServer.Command> actorRef = getExecutorInstance();
+            CompletableFuture<ReturnT<String>> future = new CompletableFuture<>();
+            getContext().askWithStatus(ReturnT.class,
+                    actorRef,
+                    Duration.ofSeconds(30L),
+                    reply -> new AkkaServer.KillCommand(killParam, reply),
+                    (returnT, throwable) -> {
+                        if (throwable != null) {
+                            future.completeExceptionally(throwable);
+                        } else {
+                            future.complete(returnT);
+                        }
+                        return null;
+                    });
+            return future.get();
+        } catch (Exception e) {
+            return new ReturnT(ReturnT.FAIL_CODE, e.getMessage());
+        }
     }
 
     @Override
     public ReturnT<LogResult> log(LogParam logParam) {
-        return null;
+        try {
+            ActorRef<AkkaServer.Command> actorRef = getExecutorInstance();
+            CompletableFuture<ReturnT<LogResult>> future = new CompletableFuture<>();
+            getContext().askWithStatus(ReturnT.class,
+                    actorRef,
+                    Duration.ofSeconds(30L),
+                    reply -> new AkkaServer.LogCommand(logParam, reply),
+                    (returnT, throwable) -> {
+                        if (throwable != null) {
+                            future.completeExceptionally(throwable);
+                        } else {
+                            future.complete(returnT);
+                        }
+                        return null;
+                    });
+            return future.get();
+        } catch (Exception e) {
+            return new ReturnT(ReturnT.FAIL_CODE, e.getMessage());
+        }
     }
 
     private ActorRef<AkkaServer.Command> getExecutorInstance() {
@@ -128,21 +195,6 @@ public class ExecutorClient extends AbstractBehavior<ExecutorClient.Command> imp
 
         public ListingWrapper(Receptionist.Listing listing) {
             this.listing = listing;
-        }
-    }
-
-    public static class ReturnTWrapper implements Command {
-        private final ReturnT returnT;
-        private final Throwable throwable;
-
-        public ReturnTWrapper(ReturnT returnT) {
-            this.returnT = returnT;
-            this.throwable = null;
-        }
-
-        public ReturnTWrapper(Throwable throwable) {
-            this.returnT = null;
-            this.throwable = throwable;
         }
     }
 }

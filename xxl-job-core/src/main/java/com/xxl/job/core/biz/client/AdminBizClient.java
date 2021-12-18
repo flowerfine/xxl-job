@@ -1,12 +1,12 @@
 package com.xxl.job.core.biz.client;
 
-import java.util.List;
-
 import com.xxl.job.core.biz.AdminBiz;
-import com.xxl.job.core.biz.model.HandleCallbackParam;
-import com.xxl.job.core.biz.model.RegistryParam;
-import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.util.XxlJobRemotingUtil;
+import com.xxl.job.remote.protocol.ReturnT;
+import com.xxl.job.remote.protocol.request.HandleCallbackParam;
+import com.xxl.job.remote.protocol.request.RegistryParam;
+
+import java.util.List;
 
 public class AdminBizClient implements AdminBiz {
 

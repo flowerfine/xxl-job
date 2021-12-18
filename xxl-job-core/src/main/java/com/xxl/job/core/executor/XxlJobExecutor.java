@@ -4,16 +4,20 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import akka.actor.typed.ActorRef;
+import akka.actor.typed.Props;
+import akka.actor.typed.javadsl.AskPattern;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.client.AdminBizClient;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.log.XxlJobFileAppender;
-import com.xxl.job.core.server.EmbedServer;
+import com.xxl.job.core.server.AkkaServer;
 import com.xxl.job.core.thread.JobLogFileCleanTask;
 import com.xxl.job.core.thread.JobThread;
 import com.xxl.job.core.thread.TriggerCallbackThread;
@@ -91,7 +95,7 @@ public class XxlJobExecutor {
         initAdminBizList(adminAddresses, accessToken);
 
         // init executor-server
-        initEmbedServer(address, ip, port, appname, accessToken);
+        initAkkaServer();
 
         // init JobLogFileCleanThread
         jobLogFileCleanTask = new JobLogFileCleanTask(Duration.ofDays(1));
@@ -111,8 +115,6 @@ public class XxlJobExecutor {
             }
             return done.get();
         }, actorSystem.executionContext());
-        // destory executor-server
-        stopEmbedServer();
 
         // destory jobThreadRepository
         if (jobThreadRepository.size() > 0) {
@@ -162,43 +164,13 @@ public class XxlJobExecutor {
         return adminBizList;
     }
 
-    // ---------------------- executor-server (rpc provider) ----------------------
-    private EmbedServer embedServer = null;
-
-    private void initEmbedServer(String address, String ip, int port, String appname, String accessToken)
-            throws Exception {
-
-        // fill ip port
-        port = port > 0 ? port : NetUtil.findAvailablePort(9999);
-        ip = (ip != null && ip.trim().length() > 0) ? ip : IpUtil.getIp();
-
-        // generate address
-        if (address == null || address.trim().length() == 0) {
-            String ip_port_address = IpUtil.getIpPort(ip, port); // registry-address：default use address to registry ,
-                                                                 // otherwise use ip:port if address is null
-            address = "http://{ip_port}/".replace("{ip_port}", ip_port_address);
-        }
-
-        // accessToken
-        if (accessToken == null || accessToken.trim().length() == 0) {
-            logger.warn(
-                    ">>>>>>>>>>> xxl-job accessToken is empty. To ensure system security, please set the accessToken.");
-        }
-
-        // start
-        embedServer = new EmbedServer();
-        embedServer.start(address, port, appname, accessToken);
-    }
-
-    private void stopEmbedServer() {
-        // stop provider factory
-        if (embedServer != null) {
-            try {
-                embedServer.stop();
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
+    private void initAkkaServer() throws Exception {
+        CompletionStage<ActorRef<AkkaServer.Command>> future = AskPattern.ask(
+                actorSystem,
+                replyTo -> new SpawnProtocol.Spawn<>(Behaviors.setup(ctx -> new AkkaServer(ctx, appname)),"AkkaServer", Props.empty(), replyTo),
+                Duration.ofSeconds(5L),
+                actorSystem.scheduler()
+        );
     }
 
     // ---------------------- job handler repository ----------------------

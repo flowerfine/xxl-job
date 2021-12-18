@@ -4,9 +4,9 @@ import com.xxl.job.admin.core.complete.XxlJobCompleter;
 import com.xxl.job.admin.core.conf.XxlJobAdminConfig;
 import com.xxl.job.dao.model.XxlJobLog;
 import com.xxl.job.admin.core.util.I18nUtil;
-import com.xxl.job.core.biz.model.HandleCallbackParam;
-import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.util.DateUtil;
+import com.xxl.job.remote.protocol.ReturnT;
+import com.xxl.job.remote.protocol.request.HandleCallbackParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

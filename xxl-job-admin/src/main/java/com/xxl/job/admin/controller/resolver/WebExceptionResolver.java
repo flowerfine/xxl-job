@@ -6,9 +6,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.xxl.job.admin.core.exception.XxlJobException;
-import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.util.JacksonUtil;
 
+import com.xxl.job.remote.protocol.ReturnT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

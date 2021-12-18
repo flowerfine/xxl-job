@@ -1,6 +1,6 @@
 package com.xxl.job.core.util;
 
-import com.xxl.job.core.biz.model.ReturnT;
+import com.xxl.job.remote.protocol.ReturnT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

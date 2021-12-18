@@ -1,7 +1,7 @@
 package com.xxl.job.admin.service;
 
-import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.dao.model.XxlJobInfo;
+import com.xxl.job.remote.protocol.ReturnT;
 
 import java.util.Date;
 import java.util.Map;

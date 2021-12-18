@@ -8,11 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.xxl.job.admin.core.util.CookieUtil;
 import com.xxl.job.admin.core.util.I18nUtil;
-import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.util.JacksonUtil;
 import com.xxl.job.dao.XxlJobUserDao;
 import com.xxl.job.dao.model.XxlJobUser;
 
+import com.xxl.job.remote.protocol.ReturnT;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.DigestUtils;
 

@@ -7,7 +7,7 @@ import com.xxl.job.dao.model.XxlJobGroup;
 import com.xxl.job.dao.model.XxlJobUser;
 import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.admin.service.LoginService;
-import com.xxl.job.core.biz.model.ReturnT;
+import com.xxl.job.remote.protocol.ReturnT;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.DigestUtils;

@@ -152,7 +152,7 @@ public class ExecutorServiceImpl implements ExecutorService {
             return ReturnT.SUCCESS;
         }
 
-        return new ReturnT(com.xxl.job.core.biz.model.ReturnT.SUCCESS_CODE, "job thread already killed.");
+        return new ReturnT(ReturnT.SUCCESS_CODE, "job thread already killed.");
     }
 
     @Override
