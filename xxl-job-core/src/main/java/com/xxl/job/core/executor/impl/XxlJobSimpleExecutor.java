@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -25,34 +24,23 @@ public class XxlJobSimpleExecutor extends XxlJobExecutor {
     @Getter
     private List<Object> xxlJobBeanList = new ArrayList<>();
 
-    public void start() {
+    public void afterPropertiesSet() throws Exception {
+        super.afterPropertiesSet();
 
         // init JobHandler Repository (for method)
         initJobHandlerMethodRepository(xxlJobBeanList);
-
-        // super start
-        try {
-            super.start();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
-
-    public void destroy() {
-        super.destroy();
-    }
-
 
     private void initJobHandlerMethodRepository(List<Object> xxlJobBeanList) {
-        if (xxlJobBeanList==null || xxlJobBeanList.size()==0) {
+        if (xxlJobBeanList == null || xxlJobBeanList.size() == 0) {
             return;
         }
 
         // init job handler from method
-        for (Object bean: xxlJobBeanList) {
+        for (Object bean : xxlJobBeanList) {
             // method
             Method[] methods = bean.getClass().getDeclaredMethods();
-            if (methods==null || methods.length==0) {
+            if (methods == null || methods.length == 0) {
                 continue;
             }
             for (Method executeMethod : methods) {

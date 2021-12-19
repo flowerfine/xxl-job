@@ -7,7 +7,6 @@ import com.xxl.job.core.handler.impl.MethodJobHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -21,7 +20,7 @@ import java.util.Map;
  * xxl-job executor (for spring)
  */
 public class XxlJobSpringExecutor extends XxlJobExecutor
-        implements ApplicationContextAware, SmartInitializingSingleton, DisposableBean {
+        implements ApplicationContextAware, SmartInitializingSingleton {
 
     private static final Logger logger = LoggerFactory.getLogger(XxlJobSpringExecutor.class);
 
@@ -34,16 +33,10 @@ public class XxlJobSpringExecutor extends XxlJobExecutor
 
         // refresh GlueFactory
         GlueFactory.refreshInstance(1);
-
-        try {
-            super.start();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
-    public void destroy() {
+    public void destroy() throws Exception {
         super.destroy();
     }
 

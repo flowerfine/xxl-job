@@ -23,20 +23,24 @@ import com.xxl.job.core.thread.JobLogFileCleanTask;
 import com.xxl.job.core.thread.JobThread;
 import com.xxl.job.core.thread.TriggerCallbackThread;
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import akka.actor.typed.ActorSystem;
 import akka.actor.typed.SpawnProtocol;
 import akka.actor.typed.javadsl.Behaviors;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * xxl-job executor.
  */
-public class XxlJobExecutor {
+public class XxlJobExecutor implements InitializingBean, DisposableBean {
 
     private static final Logger logger = LoggerFactory.getLogger(XxlJobExecutor.class);
 
+    @Getter
     private ActorSystem<SpawnProtocol.Command> actorSystem;
 
     private ExecutorRegistryTask executorRegistryTask;
@@ -84,7 +88,9 @@ public class XxlJobExecutor {
     }
 
     // ---------------------- start + stop ----------------------
-    public void start() throws Exception {
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
         Config config = ConfigFactory.load("xxl-job-executor.conf");
         actorSystem = ActorSystem.create(Behaviors.setup(ctx -> SpawnProtocol.create()), "xxl-job", config);
 
@@ -108,7 +114,8 @@ public class XxlJobExecutor {
         TriggerCallbackThread.getInstance().start();
     }
 
-    public void destroy() {
+    @Override
+    public void destroy() throws Exception {
         actorSystem.terminate();
         actorSystem.whenTerminated().onComplete(done -> {
             if (done.isSuccess()) {
