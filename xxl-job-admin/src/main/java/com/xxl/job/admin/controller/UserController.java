@@ -22,9 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author xuxueli 2019-05-04 16:39:50
- */
 @Controller
 @RequestMapping("/user")
 public class UserController {
@@ -37,16 +34,14 @@ public class UserController {
     @RequestMapping
     @PermissionLimit(adminuser = true)
     public String index(Model model) {
-
         // 执行器列表
         List<XxlJobGroup> groupList = xxlJobGroupDao.findAll();
         model.addAttribute("groupList", groupList);
-
         return "user/user.index";
     }
 
-    @RequestMapping("/pageList")
     @ResponseBody
+    @RequestMapping("/pageList")
     @PermissionLimit(adminuser = true)
     public Map<String, Object> pageList(@RequestParam(required = false, defaultValue = "0") int start,
                                         @RequestParam(required = false, defaultValue = "10") int length,
@@ -71,8 +66,8 @@ public class UserController {
         return maps;
     }
 
-    @RequestMapping("/add")
     @ResponseBody
+    @RequestMapping("/add")
     @PermissionLimit(adminuser = true)
     public ReturnT<String> add(XxlJobUser xxlJobUser) {
 
@@ -106,8 +101,8 @@ public class UserController {
         return ReturnT.SUCCESS;
     }
 
-    @RequestMapping("/update")
     @ResponseBody
+    @RequestMapping("/update")
     @PermissionLimit(adminuser = true)
     public ReturnT<String> update(HttpServletRequest request, XxlJobUser xxlJobUser) {
 
@@ -134,8 +129,8 @@ public class UserController {
         return ReturnT.SUCCESS;
     }
 
-    @RequestMapping("/remove")
     @ResponseBody
+    @RequestMapping("/remove")
     @PermissionLimit(adminuser = true)
     public ReturnT<String> remove(HttpServletRequest request, int id) {
 
@@ -149,8 +144,8 @@ public class UserController {
         return ReturnT.SUCCESS;
     }
 
-    @RequestMapping("/updatePwd")
     @ResponseBody
+    @RequestMapping("/updatePwd")
     public ReturnT<String> updatePwd(HttpServletRequest request, String password){
 
         // valid password

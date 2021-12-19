@@ -8,35 +8,23 @@ import com.xxl.job.core.util.XxlJobRemotingUtil;
 import com.xxl.job.remote.protocol.ReturnT;
 import com.xxl.job.remote.protocol.request.HandleCallbackParam;
 import com.xxl.job.remote.protocol.request.RegistryParam;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-/**
- * Created by xuxueli on 17/5/10.
- */
-@Controller
+@RestController
 @RequestMapping("/api")
 public class JobApiController {
 
     @Resource
     private AdminBiz adminBiz;
 
-    /**
-     * api
-     *
-     * @param uri
-     * @param data
-     * @return
-     */
     @RequestMapping("/{uri}")
-    @ResponseBody
     @PermissionLimit(limit = false)
     public ReturnT<String> api(HttpServletRequest request, @PathVariable("uri") String uri, @RequestBody(required = false) String data) {
 
