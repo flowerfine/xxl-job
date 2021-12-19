@@ -26,8 +26,12 @@ public class XxlJobScheduler {
 
     private static ConcurrentMap<String, ConcurrentMap<String, ExecutorService>> executorMap = new ConcurrentHashMap<>();
 
-    @Autowired
     private static ActorSystem<SpawnProtocol.Command> actorSystem;
+
+    @Autowired
+    public void setActorSystem(ActorSystem<SpawnProtocol.Command> actorSystem) {
+        XxlJobScheduler.actorSystem = actorSystem;
+    }
 
     public static ExecutorService getExecutorBiz(String appname, String address) throws Exception {
         if (StringUtils.hasText(appname) == false) {
