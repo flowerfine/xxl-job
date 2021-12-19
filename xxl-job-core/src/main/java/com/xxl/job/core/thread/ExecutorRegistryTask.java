@@ -8,6 +8,7 @@ import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.util.IpUtil;
 import com.xxl.job.core.util.JacksonUtil;
 import com.xxl.job.core.util.NetUtil;
+import com.xxl.job.remote.ActorSelectionHelper;
 import com.xxl.job.remote.protocol.ReturnT;
 import com.xxl.job.remote.protocol.request.RegistryParam;
 import io.netty.util.Timeout;
@@ -34,6 +35,8 @@ public class ExecutorRegistryTask extends AbstractTask {
         if (StringUtils.hasText(host) == false) {
             Config config = ConfigFactory.load("xxl-job-executor.conf");
             host = config.getString("akka.remote.artery.canonical.host") + ":" + config.getInt("akka.remote.artery.canonical.port");
+        } else {
+            host = ActorSelectionHelper.getIpAndPortFromAkkaPath(host);
         }
         this.appname = appname;
         this.host = host;

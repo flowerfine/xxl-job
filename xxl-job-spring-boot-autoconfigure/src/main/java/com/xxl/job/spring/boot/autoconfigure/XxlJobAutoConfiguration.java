@@ -33,9 +33,6 @@ public class XxlJobAutoConfiguration {
         XxlJobSpringExecutor xxlJobSpringExecutor = new XxlJobSpringExecutor();
         xxlJobSpringExecutor.setAdminAddresses(properties.getAdminAddresses());
         xxlJobSpringExecutor.setAppname(properties.getExecutorAppName());
-        if (properties.getExecutorPort() != null) {
-            xxlJobSpringExecutor.setPort(properties.getExecutorPort());
-        }
         xxlJobSpringExecutor.setLogPath(System.getProperty("user.home") + "/logs/jobhandler");
         xxlJobSpringExecutor.setLogRetentionDays(7);
         if (CollectionUtils.isEmpty(customizers) == false) {
