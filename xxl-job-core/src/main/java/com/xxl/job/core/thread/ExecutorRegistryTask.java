@@ -20,20 +20,24 @@ public class ExecutorRegistryTask extends AbstractTask {
     private static Logger logger = LoggerFactory.getLogger(ExecutorRegistryTask.class);
 
     private final String appname;
-    private final String address;
+    private final String host;
 
-    public ExecutorRegistryTask(String appname, String address) {
+    public ExecutorRegistryTask(String appname, String address, int port) {
         if (appname == null || appname.trim().length() == 0) {
             throw new IllegalArgumentException(">>>>>>>>>>> xxl-job, executor registry config fail, appname is null.");
         }
         if (StringUtils.hasText(address) == false) {
             address = IpUtil.getIp();
         }
+        if (port == 0) {
+            port = NetUtil.findAvailablePort(9998);
+        }
+
         if (XxlJobExecutor.getAdminBizList() == null) {
             throw new IllegalArgumentException(">>>>>>>>>>> xxl-job, executor registry config fail, adminAddresses is null.");
         }
         this.appname = appname;
-        this.address = address;
+        this.host = address + ":" + port;
     }
 
     @Override
@@ -57,7 +61,7 @@ public class ExecutorRegistryTask extends AbstractTask {
 
     private void registry() {
         try {
-            RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), appname, address);
+            RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), appname, host);
             for (AdminBiz adminBiz : XxlJobExecutor.getAdminBizList()) {
                 try {
                     ReturnT<String> registryResult = adminBiz.registry(registryParam);
@@ -84,7 +88,7 @@ public class ExecutorRegistryTask extends AbstractTask {
 
     private void remove() {
         try {
-            RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), appname, address);
+            RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), appname, host);
             for (AdminBiz adminBiz : XxlJobExecutor.getAdminBizList()) {
                 try {
                     ReturnT<String> registryResult = adminBiz.registryRemove(registryParam);

@@ -6,7 +6,6 @@ import akka.actor.AddressFromURIString;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.PostStop;
-import akka.actor.typed.PreRestart;
 import akka.actor.typed.javadsl.*;
 import akka.actor.typed.receptionist.Receptionist;
 import akka.actor.typed.receptionist.ServiceKey;
@@ -29,12 +28,23 @@ public class ExecutorBehavior extends AbstractBehavior<ExecutorBehavior.Command>
         super(context);
         this.appname = appname;
         this.address = address;
+
+        this.serviceKey = ServiceKeyHelper.getServiceKey(AkkaServer.Command.class, appname);
+
+        String canonicalAddress = ActorSelectionHelper.getAppnameAddress(appname, address);
+        getContext().getLog().info("执行器启动! canonicalAddress: {}", canonicalAddress);
+        Address remoteAddress = AddressFromURIString.parse(canonicalAddress);
+        String receptionistPath = getContext().getSystem().receptionist().path().toStringWithAddress(remoteAddress);
+        ActorSelection actorSelection = getContext().classicActorContext().actorSelection(receptionistPath);
+        ActorRef<Receptionist.Listing> listingActorRef = getContext().messageAdapter(Receptionist.Listing.class, ListingWrapper::new);
+
+        Receptionist.Command command = Receptionist.find(serviceKey, listingActorRef);
+        actorSelection.tell(command, Adapter.toClassic(getContext().getSelf()));
     }
 
     @Override
     public Receive<Command> createReceive() {
         return newReceiveBuilder()
-                .onSignal(PreRestart.class, this::onStart)
                 .onSignal(PostStop.class, this::onStop)
                 .onMessage(ListingWrapper.class, this::onListing)
                 .onMessage(RemoteActorCommand.class, this::onRemote)
@@ -57,20 +67,6 @@ public class ExecutorBehavior extends AbstractBehavior<ExecutorBehavior.Command>
         return Behaviors.stopped();
     }
 
-    private Behavior<Command> onStart(PreRestart restart) {
-        this.serviceKey = ServiceKeyHelper.getServiceKey(AkkaServer.Command.class, appname);
-
-        String canonicalAddress = ActorSelectionHelper.getAppnameAddress(appname, this.address);
-        Address address = AddressFromURIString.parse(canonicalAddress);
-        String receptionistPath = getContext().getSystem().receptionist().path().toStringWithAddress(address);
-        ActorSelection actorSelection = getContext().classicActorContext().actorSelection(receptionistPath);
-        ActorRef<Receptionist.Listing> listingActorRef = getContext().messageAdapter(Receptionist.Listing.class, ListingWrapper::new);
-
-        Receptionist.Command command = Receptionist.find(serviceKey, listingActorRef);
-        actorSelection.tell(command, Adapter.toClassic(getContext().getSelf()));
-        return Behaviors.same();
-    }
-
     private Behavior<Command> onStop(PostStop stop) {
         return Behaviors.stopped();
     }
@@ -89,6 +85,7 @@ public class ExecutorBehavior extends AbstractBehavior<ExecutorBehavior.Command>
 
     public static class RemoteActorCommand implements Command {
         public final ActorRef<ActorRef<AkkaServer.Command>> replyTo;
+
         public RemoteActorCommand(ActorRef<ActorRef<AkkaServer.Command>> replyTo) {
             this.replyTo = replyTo;
         }

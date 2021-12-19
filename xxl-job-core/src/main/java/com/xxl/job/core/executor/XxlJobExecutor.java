@@ -94,7 +94,7 @@ public class XxlJobExecutor {
         // init invoker, admin-client
         initAdminBizList(adminAddresses, accessToken);
 
-        executorRegistryTask = new ExecutorRegistryTask(appname, address);
+        executorRegistryTask = new ExecutorRegistryTask(appname, address, port);
         executorRegistryTask.start();
 
         // init executor-server
