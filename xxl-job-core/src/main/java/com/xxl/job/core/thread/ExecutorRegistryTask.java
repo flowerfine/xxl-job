@@ -1,5 +1,7 @@
 package com.xxl.job.core.thread;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.enums.RegistryConfig;
 import com.xxl.job.core.executor.XxlJobExecutor;
@@ -22,22 +24,19 @@ public class ExecutorRegistryTask extends AbstractTask {
     private final String appname;
     private final String host;
 
-    public ExecutorRegistryTask(String appname, String address, int port) {
+    public ExecutorRegistryTask(String appname, String host) {
         if (appname == null || appname.trim().length() == 0) {
             throw new IllegalArgumentException(">>>>>>>>>>> xxl-job, executor registry config fail, appname is null.");
         }
-        if (StringUtils.hasText(address) == false) {
-            address = IpUtil.getIp();
-        }
-        if (port == 0) {
-            port = NetUtil.findAvailablePort(9998);
-        }
-
         if (XxlJobExecutor.getAdminBizList() == null) {
             throw new IllegalArgumentException(">>>>>>>>>>> xxl-job, executor registry config fail, adminAddresses is null.");
         }
+        if (StringUtils.hasText(host) == false) {
+            Config config = ConfigFactory.load("xxl-job-executor.conf");
+            host = config.getString("akka.remote.artery.canonical.host") + ":" + config.getInt("akka.remote.artery.canonical.port");
+        }
         this.appname = appname;
-        this.host = address + ":" + port;
+        this.host = host;
     }
 
     @Override

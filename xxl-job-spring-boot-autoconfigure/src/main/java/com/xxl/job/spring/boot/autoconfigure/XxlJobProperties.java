@@ -19,12 +19,6 @@ public class XxlJobProperties {
 
     private String executorAppName;
 
-    private String executorAddress;
-
-    private String executorIp;
-
-    private Integer executorPort;
-
     private String executorLogPath;
 
     private Duration executorLogRetentionDuration;
