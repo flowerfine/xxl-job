@@ -1,22 +1,35 @@
 package com.xxl.job.admin.core.scheduler;
 
-import com.xxl.job.admin.core.conf.XxlJobAdminConfig;
+import akka.actor.typed.*;
+import akka.actor.typed.javadsl.AskPattern;
+import akka.actor.typed.javadsl.Behaviors;
 import com.xxl.job.admin.core.thread.*;
 import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
+import com.xxl.job.core.remote.client.ExecutorBehavior;
 import com.xxl.job.core.remote.client.ExecutorClient;
+import com.xxl.job.core.server.AkkaServer;
 import com.xxl.job.remote.ExecutorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import java.time.Duration;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
+@Component
 public class XxlJobScheduler implements InitializingBean, DisposableBean {
 
-    private static ConcurrentMap<String, ExecutorService> executorBizRepository = new ConcurrentHashMap();
+    private static ConcurrentMap<String, ConcurrentMap<String, ExecutorService>> executorMap = new ConcurrentHashMap<>();
+
+    @Autowired
+    private static ActorSystem<SpawnProtocol.Command> actorSystem;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -72,22 +85,36 @@ public class XxlJobScheduler implements InitializingBean, DisposableBean {
     }
 
     public static ExecutorService getExecutorBiz(String appname, String address) throws Exception {
-        // valid
-        if (address == null || address.trim().length() == 0) {
+        if (StringUtils.hasText(appname) == false) {
+            return null;
+        }
+        ConcurrentMap<String, ExecutorService> addressMap = executorMap.computeIfAbsent(appname, (key) -> new ConcurrentHashMap<>());
+        if (StringUtils.hasText(address) == false) {
             return null;
         }
 
-        // load-cache
-        address = address.trim();
-        ExecutorService executorBiz = executorBizRepository.get(address);
+        ExecutorService executorBiz = addressMap.get(address);
         if (executorBiz != null) {
             return executorBiz;
         }
 
-        // set-cache
-        executorBiz = new ExecutorClient(address, XxlJobAdminConfig.getAdminConfig().getAccessToken());
+        String actorName = "Executor-" + appname + "-" + address;
+        CompletionStage<ActorRef<ExecutorBehavior.Command>> registered =
+                AskPattern.ask(
+                        actorSystem,
+                        replyTo -> new SpawnProtocol.Spawn<>(Behaviors.setup(ctx -> new ExecutorBehavior(ctx, appname, address)), actorName, Props.empty(), replyTo),
+                        Duration.ofSeconds(3L),
+                        actorSystem.scheduler());
+        ActorRef<ExecutorBehavior.Command> actorRef = registered.toCompletableFuture().get();
+        CompletionStage<ActorRef<AkkaServer.Command>> client =
+                AskPattern.ask(
+                        actorRef,
+                        replyTo -> new ExecutorBehavior.RemoteActorCommand(replyTo),
+                        Duration.ofSeconds(3L),
+                        actorSystem.scheduler());
 
-        executorBizRepository.put(address, executorBiz);
+        executorBiz = new ExecutorClient(actorSystem, client.toCompletableFuture().get());
+        addressMap.put(address, executorBiz);
         return executorBiz;
     }
 

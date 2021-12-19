@@ -5,6 +5,7 @@ import com.xxl.job.admin.core.scheduler.XxlJobScheduler;
 import com.xxl.job.dao.*;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ import java.util.Arrays;
  * xxl-job config
  */
 @Component
-public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
+public class XxlJobAdminConfig implements InitializingBean {
 
     private static XxlJobAdminConfig adminConfig = null;
 
@@ -28,21 +29,13 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     // ---------------------- XxlJobScheduler ----------------------
 
+    @Autowired
     private XxlJobScheduler xxlJobScheduler;
 
     @Override
     public void afterPropertiesSet() throws Exception {
         adminConfig = this;
-
-        xxlJobScheduler = new XxlJobScheduler();
-        xxlJobScheduler.init();
     }
-
-    @Override
-    public void destroy() throws Exception {
-        xxlJobScheduler.destroy();
-    }
-
 
     // ---------------------- XxlJobScheduler ----------------------
 

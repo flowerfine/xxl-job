@@ -2,11 +2,11 @@ package com.xxl.job.adminbiz;
 
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.biz.client.AdminBizClient;
-import com.xxl.job.core.biz.model.HandleCallbackParam;
-import com.xxl.job.core.biz.model.RegistryParam;
-import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.context.XxlJobContext;
 import com.xxl.job.core.enums.RegistryConfig;
+import com.xxl.job.remote.protocol.ReturnT;
+import com.xxl.job.remote.protocol.request.HandleCallbackParam;
+import com.xxl.job.remote.protocol.request.RegistryParam;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

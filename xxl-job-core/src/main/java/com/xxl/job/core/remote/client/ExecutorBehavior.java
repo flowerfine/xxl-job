@@ -14,6 +14,7 @@ import com.xxl.job.core.server.AkkaServer;
 import com.xxl.job.core.server.ServiceKeyHelper;
 import com.xxl.job.remote.ActorSelectionHelper;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class ExecutorBehavior extends AbstractBehavior<ExecutorBehavior.Command> {
@@ -36,6 +37,7 @@ public class ExecutorBehavior extends AbstractBehavior<ExecutorBehavior.Command>
                 .onSignal(PreRestart.class, this::onStart)
                 .onSignal(PostStop.class, this::onStop)
                 .onMessage(ListingWrapper.class, this::onListing)
+                .onMessage(RemoteActorCommand.class, this::onRemote)
                 .build();
     }
 
@@ -43,6 +45,16 @@ public class ExecutorBehavior extends AbstractBehavior<ExecutorBehavior.Command>
         this.executors = listingWrapper.listing.getServiceInstances(serviceKey);
         this.executors.forEach(executor -> System.out.println("执行器地址: " + executor.path()));
         return Behaviors.same();
+    }
+
+    private Behavior<Command> onRemote(RemoteActorCommand command) {
+        Optional<ActorRef<AkkaServer.Command>> optional = executors.stream().findAny();
+        if (optional.isPresent()) {
+            command.replyTo.tell(optional.get());
+        } else {
+            command.replyTo.tell(null);
+        }
+        return Behaviors.stopped();
     }
 
     private Behavior<Command> onStart(PreRestart restart) {
@@ -60,7 +72,7 @@ public class ExecutorBehavior extends AbstractBehavior<ExecutorBehavior.Command>
     }
 
     private Behavior<Command> onStop(PostStop stop) {
-        return Behaviors.same();
+        return Behaviors.stopped();
     }
 
     public interface Command {
@@ -72,6 +84,13 @@ public class ExecutorBehavior extends AbstractBehavior<ExecutorBehavior.Command>
 
         public ListingWrapper(Receptionist.Listing listing) {
             this.listing = listing;
+        }
+    }
+
+    public static class RemoteActorCommand implements Command {
+        public final ActorRef<ActorRef<AkkaServer.Command>> replyTo;
+        public RemoteActorCommand(ActorRef<ActorRef<AkkaServer.Command>> replyTo) {
+            this.replyTo = replyTo;
         }
     }
 }

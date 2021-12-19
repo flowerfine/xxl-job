@@ -18,6 +18,7 @@ import com.xxl.job.remote.protocol.request.LogParam;
 import com.xxl.job.remote.protocol.response.LogResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,6 +46,8 @@ public class JobLogController {
     public XxlJobInfoDao xxlJobInfoDao;
     @Resource
     public XxlJobLogDao xxlJobLogDao;
+    @Autowired
+    private XxlJobScheduler xxlJobScheduler;
 
     @RequestMapping
     public String index(HttpServletRequest request, Model model,
@@ -144,7 +147,7 @@ public class JobLogController {
     public ReturnT<LogResult> logDetailCat(int jobGroup, long logId, String executorAddress, long triggerTime, int fromLineNum) {
         try {
             XxlJobGroup group = xxlJobGroupDao.load(jobGroup);
-            ExecutorService executorBiz = XxlJobScheduler.getExecutorBiz(group.getAppname(), executorAddress);
+            ExecutorService executorBiz = xxlJobScheduler.getExecutorBiz(group.getAppname(), executorAddress);
             ReturnT<LogResult> logResult = executorBiz.log(new LogParam(triggerTime, logId, fromLineNum)).get();
             // is end
             if (logResult.getContent() != null
@@ -180,7 +183,7 @@ public class JobLogController {
         try {
 
             XxlJobGroup group = xxlJobGroupDao.load(jobGroup);
-            ExecutorService executorBiz = XxlJobScheduler.getExecutorBiz(group.getAppname(), log.getExecutorAddress());
+            ExecutorService executorBiz = xxlJobScheduler.getExecutorBiz(group.getAppname(), log.getExecutorAddress());
             runResult = executorBiz.kill(new KillParam(jobInfo.getId())).get();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

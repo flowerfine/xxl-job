@@ -21,8 +21,6 @@ import com.xxl.job.core.server.AkkaServer;
 import com.xxl.job.core.thread.JobLogFileCleanTask;
 import com.xxl.job.core.thread.JobThread;
 import com.xxl.job.core.thread.TriggerCallbackThread;
-import com.xxl.job.core.util.IpUtil;
-import com.xxl.job.core.util.NetUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +83,7 @@ public class XxlJobExecutor {
 
     // ---------------------- start + stop ----------------------
     public void start() throws Exception {
-        Config config = ConfigFactory.load("xxl-job.conf");
+        Config config = ConfigFactory.load("xxl-job-executor.conf");
         actorSystem = ActorSystem.create(Behaviors.setup(ctx -> SpawnProtocol.create()), "xxl-job", config);
 
         // init logpath
