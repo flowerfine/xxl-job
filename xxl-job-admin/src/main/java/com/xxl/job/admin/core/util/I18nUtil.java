@@ -1,6 +1,7 @@
 package com.xxl.job.admin.core.util;
 
 import com.xxl.job.admin.core.conf.XxlJobAdminConfig;
+import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.util.JacksonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,13 @@ public class I18nUtil {
     @Autowired
     public void setXxlJobAdminConfig(XxlJobAdminConfig xxlJobAdminConfig) {
         I18nUtil.xxlJobAdminConfig = xxlJobAdminConfig;
+        initI18n();
+    }
+
+    private void initI18n() {
+        for (ExecutorBlockStrategyEnum item : ExecutorBlockStrategyEnum.values()) {
+            item.setTitle(I18nUtil.getString("jobconf_block_".concat(item.name())));
+        }
     }
 
     public static Properties loadI18nProp() {
