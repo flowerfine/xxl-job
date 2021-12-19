@@ -20,6 +20,7 @@ import com.xxl.job.dao.model.XxlJobUser;
 import com.xxl.job.remote.protocol.ReturnT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +43,8 @@ public class JobInfoController {
     private XxlJobGroupDao xxlJobGroupDao;
     @Resource
     private XxlJobService xxlJobService;
+    @Autowired
+    private JobTriggerPoolHelper jobTriggerPoolHelper;
 
     @RequestMapping
     public String index(HttpServletRequest request, Model model, @RequestParam(required = false, defaultValue = "-1") int jobGroup) {
@@ -144,7 +147,7 @@ public class JobInfoController {
             executorParam = "";
         }
 
-        JobTriggerPoolHelper.trigger(id, TriggerTypeEnum.MANUAL, -1, null, executorParam, addressList);
+        jobTriggerPoolHelper.trigger(id, TriggerTypeEnum.MANUAL, -1, null, executorParam, addressList);
         return ReturnT.SUCCESS;
     }
 

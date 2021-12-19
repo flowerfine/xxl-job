@@ -13,19 +13,27 @@ import java.util.List;
 @Service
 public class AdminBizImpl implements AdminBiz {
 
+    private JobCompleteHelper jobCompleteHelper;
+    private JobRegistryHelper jobRegistryHelper;
+
+    public AdminBizImpl(JobCompleteHelper jobCompleteHelper, JobRegistryHelper jobRegistryHelper) {
+        this.jobCompleteHelper = jobCompleteHelper;
+        this.jobRegistryHelper = jobRegistryHelper;
+    }
+
     @Override
     public ReturnT<String> callback(List<HandleCallbackParam> callbackParamList) {
-        return JobCompleteHelper.getInstance().callback(callbackParamList);
+        return jobCompleteHelper.callback(callbackParamList);
     }
 
     @Override
     public ReturnT<String> registry(RegistryParam registryParam) {
-        return JobRegistryHelper.getInstance().registry(registryParam);
+        return jobRegistryHelper.registry(registryParam);
     }
 
     @Override
     public ReturnT<String> registryRemove(RegistryParam registryParam) {
-        return JobRegistryHelper.getInstance().registryRemove(registryParam);
+        return jobRegistryHelper.registryRemove(registryParam);
     }
 
 }

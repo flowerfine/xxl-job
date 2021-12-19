@@ -1,9 +1,11 @@
 package com.xxl.job.admin.core.scheduler;
 
-import akka.actor.typed.*;
+import akka.actor.typed.ActorRef;
+import akka.actor.typed.ActorSystem;
+import akka.actor.typed.Props;
+import akka.actor.typed.SpawnProtocol;
 import akka.actor.typed.javadsl.AskPattern;
 import akka.actor.typed.javadsl.Behaviors;
-import com.xxl.job.admin.core.thread.*;
 import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.remote.client.ExecutorBehavior;
@@ -11,7 +13,6 @@ import com.xxl.job.core.remote.client.ExecutorClient;
 import com.xxl.job.core.server.AkkaServer;
 import com.xxl.job.remote.ExecutorService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
 @Component
-public class XxlJobScheduler implements InitializingBean, DisposableBean {
+public class XxlJobScheduler implements InitializingBean {
 
     private static ConcurrentMap<String, ConcurrentMap<String, ExecutorService>> executorMap = new ConcurrentHashMap<>();
 
@@ -34,48 +35,7 @@ public class XxlJobScheduler implements InitializingBean, DisposableBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         initI18n();
-
-        // admin trigger pool start
-        JobTriggerPoolHelper.toStart();
-
-        // admin registry monitor run
-        JobRegistryHelper.getInstance().start();
-
-        // admin fail-monitor run
-        JobFailMonitorHelper.getInstance().start();
-
-        // admin lose-monitor run ( depend on JobTriggerPoolHelper )
-        JobCompleteHelper.getInstance().start();
-
-        // admin log report start
-        JobLogReportHelper.getInstance().start();
-
-        // start-schedule  ( depend on JobTriggerPoolHelper )
-        JobScheduleHelper.getInstance().start();
-
         log.info(">>>>>>>>> init xxl-job admin success.");
-    }
-
-    public void destroy() throws Exception {
-
-        // stop-schedule
-        JobScheduleHelper.getInstance().toStop();
-
-        // admin log report stop
-        JobLogReportHelper.getInstance().toStop();
-
-        // admin lose-monitor stop
-        JobCompleteHelper.getInstance().toStop();
-
-        // admin fail-monitor stop
-        JobFailMonitorHelper.getInstance().toStop();
-
-        // admin registry stop
-        JobRegistryHelper.getInstance().toStop();
-
-        // admin trigger pool stop
-        JobTriggerPoolHelper.toStop();
-
     }
 
     private void initI18n() {

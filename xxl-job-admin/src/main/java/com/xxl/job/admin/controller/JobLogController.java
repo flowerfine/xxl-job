@@ -48,6 +48,8 @@ public class JobLogController {
     public XxlJobLogDao xxlJobLogDao;
     @Autowired
     private XxlJobScheduler xxlJobScheduler;
+    @Autowired
+    private XxlJobCompleter xxlJobCompleter;
 
     @RequestMapping
     public String index(HttpServletRequest request, Model model,
@@ -195,7 +197,7 @@ public class JobLogController {
             log.setHandleMsg(I18nUtil.getString("joblog_kill_log_byman") + ":"
                     + (runResult.getMsg() != null ? runResult.getMsg() : ""));
             log.setHandleTime(new Date());
-            XxlJobCompleter.updateHandleInfoAndFinish(log);
+            xxlJobCompleter.updateHandleInfoAndFinish(log);
             return new ReturnT(runResult.getMsg());
         } else {
             return new ReturnT(500, runResult.getMsg());

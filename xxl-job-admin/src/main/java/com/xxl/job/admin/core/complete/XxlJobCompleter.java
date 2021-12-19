@@ -8,15 +8,21 @@ import com.xxl.job.core.context.XxlJobContext;
 import com.xxl.job.dao.model.XxlJobInfo;
 import com.xxl.job.dao.model.XxlJobLog;
 import com.xxl.job.remote.protocol.ReturnT;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.text.MessageFormat;
 
+@Component
 public class XxlJobCompleter {
+
+    @Autowired
+    private JobTriggerPoolHelper jobTriggerPoolHelper;
 
     /**
      * common fresh handle entrance (limit only once)
      */
-    public static int updateHandleInfoAndFinish(XxlJobLog xxlJobLog) {
+    public int updateHandleInfoAndFinish(XxlJobLog xxlJobLog) {
 
         // finish
         finishJob(xxlJobLog);
@@ -34,7 +40,7 @@ public class XxlJobCompleter {
     /**
      * do somethind to finish job
      */
-    private static void finishJob(XxlJobLog xxlJobLog) {
+    private void finishJob(XxlJobLog xxlJobLog) {
 
         // 1、handle success, to trigger child job
         String triggerChildMsg = null;
@@ -48,7 +54,7 @@ public class XxlJobCompleter {
                     int childJobId = (childJobIds[i] != null && childJobIds[i].trim().length() > 0 && isNumeric(childJobIds[i])) ? Integer.valueOf(childJobIds[i]) : -1;
                     if (childJobId > 0) {
 
-                        JobTriggerPoolHelper.trigger(childJobId, TriggerTypeEnum.PARENT, -1, null, null, null);
+                        jobTriggerPoolHelper.trigger(childJobId, TriggerTypeEnum.PARENT, -1, null, null, null);
                         ReturnT<String> triggerChildResult = ReturnT.SUCCESS;
 
                         // add msg
