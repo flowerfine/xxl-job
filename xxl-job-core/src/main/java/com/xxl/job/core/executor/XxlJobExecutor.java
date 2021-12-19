@@ -88,13 +88,14 @@ public class XxlJobExecutor {
         Config config = ConfigFactory.load("xxl-job-executor.conf");
         actorSystem = ActorSystem.create(Behaviors.setup(ctx -> SpawnProtocol.create()), "xxl-job", config);
 
-        executorRegistryTask = new ExecutorRegistryTask(appname, address);
-        executorRegistryTask.start();
         // init logpath
         XxlJobFileAppender.initLogPath(logPath);
 
         // init invoker, admin-client
         initAdminBizList(adminAddresses, accessToken);
+
+        executorRegistryTask = new ExecutorRegistryTask(appname, address);
+        executorRegistryTask.start();
 
         // init executor-server
         initAkkaServer();

@@ -3,12 +3,15 @@ package com.xxl.job.core.thread;
 import com.xxl.job.core.biz.AdminBiz;
 import com.xxl.job.core.enums.RegistryConfig;
 import com.xxl.job.core.executor.XxlJobExecutor;
+import com.xxl.job.core.util.IpUtil;
 import com.xxl.job.core.util.JacksonUtil;
+import com.xxl.job.core.util.NetUtil;
 import com.xxl.job.remote.protocol.ReturnT;
 import com.xxl.job.remote.protocol.request.RegistryParam;
 import io.netty.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +25,9 @@ public class ExecutorRegistryTask extends AbstractTask {
     public ExecutorRegistryTask(String appname, String address) {
         if (appname == null || appname.trim().length() == 0) {
             throw new IllegalArgumentException(">>>>>>>>>>> xxl-job, executor registry config fail, appname is null.");
+        }
+        if (StringUtils.hasText(address) == false) {
+            address = IpUtil.getIp();
         }
         if (XxlJobExecutor.getAdminBizList() == null) {
             throw new IllegalArgumentException(">>>>>>>>>>> xxl-job, executor registry config fail, adminAddresses is null.");
