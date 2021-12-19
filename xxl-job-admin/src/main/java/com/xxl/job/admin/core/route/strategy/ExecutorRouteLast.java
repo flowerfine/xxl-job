@@ -6,14 +6,11 @@ import com.xxl.job.remote.protocol.request.TriggerParam;
 
 import java.util.List;
 
-/**
- * Created by xuxueli on 17/3/10.
- */
 public class ExecutorRouteLast extends ExecutorRouter {
 
     @Override
     public ReturnT<String> route(TriggerParam triggerParam, String appname, List<String> addressList) {
-        return new ReturnT<String>(addressList.get(addressList.size() - 1));
+        return new ReturnT(addressList.get(addressList.size() - 1));
     }
 
 }

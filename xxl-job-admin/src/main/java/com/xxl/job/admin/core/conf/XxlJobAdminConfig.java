@@ -15,14 +15,12 @@ import java.util.Arrays;
 
 /**
  * xxl-job config
- *
- * @author xuxueli 2017-04-28
  */
-
 @Component
 public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     private static XxlJobAdminConfig adminConfig = null;
+
     public static XxlJobAdminConfig getAdminConfig() {
         return adminConfig;
     }

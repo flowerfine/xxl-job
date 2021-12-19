@@ -10,9 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * @author xuxueli 2017-07-27 21:54:20
- */
 @Service
 public class AdminBizImpl implements AdminBiz {
 

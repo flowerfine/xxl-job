@@ -1,5 +1,12 @@
-package com.xxl.job.core.remote.impl;
+package com.xxl.job.core.server;
 
+import akka.actor.typed.ActorRef;
+import akka.actor.typed.Behavior;
+import akka.actor.typed.javadsl.AbstractBehavior;
+import akka.actor.typed.javadsl.ActorContext;
+import akka.actor.typed.javadsl.Behaviors;
+import akka.actor.typed.javadsl.Receive;
+import akka.pattern.StatusReply;
 import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.glue.GlueFactory;
@@ -7,75 +14,72 @@ import com.xxl.job.core.glue.GlueTypeEnum;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.handler.impl.GlueJobHandler;
 import com.xxl.job.core.handler.impl.ScriptJobHandler;
-import com.xxl.job.core.log.XxlJobFileAppender;
 import com.xxl.job.core.thread.JobThread;
-import com.xxl.job.remote.ExecutorService;
 import com.xxl.job.remote.protocol.ReturnT;
-import com.xxl.job.remote.protocol.request.IdleBeatParam;
-import com.xxl.job.remote.protocol.request.KillParam;
-import com.xxl.job.remote.protocol.request.LogParam;
 import com.xxl.job.remote.protocol.request.TriggerParam;
-import com.xxl.job.remote.protocol.response.LogResult;
-import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
+public class RunAction extends AbstractBehavior<AkkaServer.Command> {
 
-@Slf4j
-public class ExecutorServiceImpl implements ExecutorService {
-
-    @Override
-    public ReturnT<String> beat() {
-        return ReturnT.SUCCESS;
+    public RunAction(ActorContext<AkkaServer.Command> context) {
+        super(context);
     }
 
     @Override
-    public ReturnT<String> idleBeat(IdleBeatParam idleBeatParam) {
-        JobThread jobThread = XxlJobExecutor.loadJobThread(idleBeatParam.getJobId());
-        if (jobThread != null && jobThread.isRunningOrHasQueue()) {
-            return new ReturnT(ReturnT.FAIL_CODE, "job thread is running or has trigger queue.");
-        }
-
-        return ReturnT.SUCCESS;
+    public Receive<AkkaServer.Command> createReceive() {
+        return newReceiveBuilder()
+                .onMessage(AkkaServer.RunCommand.class, this::onRun)
+                .build();
     }
 
-    @Override
-    public ReturnT<String> run(TriggerParam triggerParam) {
-        GlueTypeEnum glueTypeEnum = GlueTypeEnum.match(triggerParam.getGlueType());
-        if (glueTypeEnum == null) {
-            return new ReturnT(ReturnT.FAIL_CODE, "glueType[" + triggerParam.getGlueType() + "] is not valid.");
-        }
-
-        JobThread jobThread = XxlJobExecutor.loadJobThread(triggerParam.getJobId());
-        IJobHandler jobHandler;
+    private Behavior<AkkaServer.Command> onRun(AkkaServer.RunCommand command) {
+        ActorRef<StatusReply<ReturnT<String>>> replyTo = command.getReplyTo();
+        TriggerParam triggerParam = command.getParam();
         try {
+            GlueTypeEnum glueTypeEnum = GlueTypeEnum.match(triggerParam.getGlueType());
+            if (glueTypeEnum == null) {
+                replyTo.tell(StatusReply.success(new ReturnT(ReturnT.FAIL_CODE, "glueType[" + triggerParam.getGlueType() + "] is not valid.")));
+                return Behaviors.same();
+            }
+
+            JobThread jobThread = XxlJobExecutor.loadJobThread(triggerParam.getJobId());
+            IJobHandler jobHandler;
+            try {
+                if (jobThread == null) {
+                    jobHandler = newJobHandler(triggerParam);
+                } else {
+                    jobHandler = getJobHandler(jobThread, triggerParam);
+                }
+            } catch (Exception e) {
+                getContext().getLog().error(e.getMessage(), e);
+                replyTo.tell(StatusReply.error(e));
+                return Behaviors.same();
+            }
+
             if (jobThread == null) {
-                jobHandler = newJobHandler(triggerParam);
-            } else {
-                jobHandler = getJobHandler(jobThread, triggerParam);
+                jobThread = XxlJobExecutor.registJobThread(triggerParam.getJobId(), jobHandler);
+                replyTo.tell(StatusReply.success(jobThread.pushTriggerQueue(triggerParam)));
+                return Behaviors.same();
             }
+
+            ExecutorBlockStrategyEnum blockStrategy = ExecutorBlockStrategyEnum.match(triggerParam.getExecutorBlockStrategy(), null);
+            if (jobThread.isRunningOrHasQueue()) {
+                switch (blockStrategy) {
+                    case DISCARD_LATER:
+                        replyTo.tell(StatusReply.success(new ReturnT(ReturnT.FAIL_CODE, "block strategy effect：" + ExecutorBlockStrategyEnum.DISCARD_LATER.getTitle())));
+                        return Behaviors.same();
+                    case COVER_EARLY:
+                        XxlJobExecutor.removeJobThread(triggerParam.getJobId(), "block strategy effect：" + ExecutorBlockStrategyEnum.COVER_EARLY.getTitle());
+                        jobThread = XxlJobExecutor.registJobThread(triggerParam.getJobId(), jobHandler);
+                        break;
+                    default:
+                }
+            }
+            replyTo.tell(StatusReply.success(jobThread.pushTriggerQueue(triggerParam)));
+            return Behaviors.same();
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new ReturnT(ReturnT.FAIL_CODE, e.getMessage());
+            replyTo.tell(StatusReply.error(e));
         }
-
-        if (jobThread == null) {
-            jobThread = XxlJobExecutor.registJobThread(triggerParam.getJobId(), jobHandler);
-            return jobThread.pushTriggerQueue(triggerParam);
-        }
-
-        ExecutorBlockStrategyEnum blockStrategy = ExecutorBlockStrategyEnum.match(triggerParam.getExecutorBlockStrategy(), null);
-        if (jobThread.isRunningOrHasQueue()) {
-            switch (blockStrategy) {
-                case DISCARD_LATER:
-                    return new ReturnT(ReturnT.FAIL_CODE, "block strategy effect：" + ExecutorBlockStrategyEnum.DISCARD_LATER.getTitle());
-                case COVER_EARLY:
-                    XxlJobExecutor.removeJobThread(triggerParam.getJobId(), "block strategy effect：" + ExecutorBlockStrategyEnum.COVER_EARLY.getTitle());
-                    jobThread = XxlJobExecutor.registJobThread(triggerParam.getJobId(), jobHandler);
-                    break;
-                default:
-            }
-        }
-        return jobThread.pushTriggerQueue(triggerParam);
+        return Behaviors.same();
     }
 
     private IJobHandler newJobHandler(TriggerParam triggerParam) throws Exception {
@@ -142,23 +146,5 @@ public class ExecutorServiceImpl implements ExecutorService {
             return new ScriptJobHandler(triggerParam.getJobId(), triggerParam.getGlueUpdatetime(), triggerParam.getGlueSource(), GlueTypeEnum.match(triggerParam.getGlueType()));
         }
         return jobHandler;
-    }
-
-    @Override
-    public ReturnT<String> kill(KillParam killParam) {
-        JobThread jobThread = XxlJobExecutor.loadJobThread(killParam.getJobId());
-        if (jobThread != null) {
-            XxlJobExecutor.removeJobThread(killParam.getJobId(), "scheduling center kill job.");
-            return ReturnT.SUCCESS;
-        }
-
-        return new ReturnT(ReturnT.SUCCESS_CODE, "job thread already killed.");
-    }
-
-    @Override
-    public ReturnT<LogResult> log(LogParam logParam) {
-        String logFileName = XxlJobFileAppender.makeLogFileName(new Date(logParam.getLogDateTim()), logParam.getLogId());
-        LogResult logResult = XxlJobFileAppender.readLog(logFileName, logParam.getFromLineNum());
-        return new ReturnT(logResult);
     }
 }

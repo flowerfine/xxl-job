@@ -10,9 +10,6 @@ import com.xxl.job.remote.protocol.request.TriggerParam;
 
 import java.util.List;
 
-/**
- * Created by xuxueli on 17/3/10.
- */
 public class ExecutorRouteBusyover extends ExecutorRouter {
 
     @Override
@@ -23,10 +20,10 @@ public class ExecutorRouteBusyover extends ExecutorRouter {
             ReturnT<String> idleBeatResult = null;
             try {
                 ExecutorService executorBiz = XxlJobScheduler.getExecutorBiz(appname, address);
-                idleBeatResult = executorBiz.idleBeat(new IdleBeatParam(triggerParam.getJobId()));
+                idleBeatResult = executorBiz.idleBeat(new IdleBeatParam(triggerParam.getJobId())).get();
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                idleBeatResult = new ReturnT<String>(ReturnT.FAIL_CODE, "" + e);
+                idleBeatResult = new ReturnT(ReturnT.FAIL_CODE, "" + e);
             }
             idleBeatResultSB.append((idleBeatResultSB.length() > 0) ? "<br><br>" : "")
                     .append(I18nUtil.getString("jobconf_idleBeat") + "：")
@@ -42,7 +39,7 @@ public class ExecutorRouteBusyover extends ExecutorRouter {
             }
         }
 
-        return new ReturnT<String>(ReturnT.FAIL_CODE, idleBeatResultSB.toString());
+        return new ReturnT(ReturnT.FAIL_CODE, idleBeatResultSB.toString());
     }
 
 }

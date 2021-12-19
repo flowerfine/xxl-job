@@ -20,18 +20,11 @@ import java.util.Set;
 
 /**
  * job alarm by email
- *
- * @author xuxueli 2020-01-19
  */
 @Component
 public class EmailJobAlarm implements JobAlarm {
     private static Logger logger = LoggerFactory.getLogger(EmailJobAlarm.class);
 
-    /**
-     * fail alarm
-     *
-     * @param jobLog
-     */
     public boolean doAlarm(XxlJobInfo info, XxlJobLog jobLog){
         boolean alarmResult = true;
 
@@ -85,8 +78,6 @@ public class EmailJobAlarm implements JobAlarm {
 
     /**
      * load email job alarm template
-     *
-     * @return
      */
     private static final String loadEmailJobAlarmTemplate(){
         String mailBodyTemplate = "<h5>" + I18nUtil.getString("jobconf_monitor_detail") + "：</span>" +

@@ -13,6 +13,7 @@ import com.xxl.job.core.util.ThrowableUtil;
 import com.xxl.job.remote.ExecutorService;
 import com.xxl.job.remote.protocol.ReturnT;
 import com.xxl.job.remote.protocol.request.TriggerParam;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,10 +21,9 @@ import java.util.Date;
 
 /**
  * xxl-job trigger
- * Created by xuxueli on 17/7/13.
  */
+@Slf4j
 public class XxlJobTrigger {
-    private static Logger logger = LoggerFactory.getLogger(XxlJobTrigger.class);
 
     /**
      * trigger job
@@ -51,7 +51,7 @@ public class XxlJobTrigger {
         // load data
         XxlJobInfo jobInfo = XxlJobAdminConfig.getAdminConfig().getXxlJobInfoDao().loadById(jobId);
         if (jobInfo == null) {
-            logger.warn(">>>>>>>>>>>> trigger fail, jobId invalid，jobId={}", jobId);
+            log.warn(">>>>>>>>>>>> trigger fail, jobId invalid，jobId={}", jobId);
             return;
         }
         if (executorParam != null) {
@@ -93,7 +93,7 @@ public class XxlJobTrigger {
 
     private static boolean isNumeric(String str){
         try {
-            int result = Integer.valueOf(str);
+            Integer.valueOf(str);
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -121,7 +121,7 @@ public class XxlJobTrigger {
         jobLog.setJobId(jobInfo.getId());
         jobLog.setTriggerTime(new Date());
         XxlJobAdminConfig.getAdminConfig().getXxlJobLogDao().save(jobLog);
-        logger.debug(">>>>>>>>>>> xxl-job trigger start, jobId:{}", jobLog.getId());
+        log.debug(">>>>>>>>>>> xxl-job trigger start, jobId:{}", jobLog.getId());
 
         // 2、init trigger-param
         TriggerParam triggerParam = new TriggerParam();
@@ -155,7 +155,7 @@ public class XxlJobTrigger {
                 }
             }
         } else {
-            routeAddressResult = new ReturnT<String>(ReturnT.FAIL_CODE, I18nUtil.getString("jobconf_trigger_address_empty"));
+            routeAddressResult = new ReturnT(ReturnT.FAIL_CODE, I18nUtil.getString("jobconf_trigger_address_empty"));
         }
 
         // 4、trigger remote executor
@@ -163,7 +163,7 @@ public class XxlJobTrigger {
         if (address != null) {
             triggerResult = runExecutor(triggerParam, group.getAppname(), address);
         } else {
-            triggerResult = new ReturnT<String>(ReturnT.FAIL_CODE, null);
+            triggerResult = new ReturnT(ReturnT.FAIL_CODE, null);
         }
 
         // 5、collection trigger info
@@ -195,23 +195,20 @@ public class XxlJobTrigger {
         jobLog.setTriggerMsg(triggerMsgSb.toString());
         XxlJobAdminConfig.getAdminConfig().getXxlJobLogDao().updateTriggerInfo(jobLog);
 
-        logger.debug(">>>>>>>>>>> xxl-job trigger end, jobId:{}", jobLog.getId());
+        log.debug(">>>>>>>>>>> xxl-job trigger end, jobId:{}", jobLog.getId());
     }
 
     /**
      * run executor
-     * @param triggerParam
-     * @param address
-     * @return
      */
     public static ReturnT<String> runExecutor(TriggerParam triggerParam, String appname, String address){
         ReturnT<String> runResult = null;
         try {
             ExecutorService executorClient = XxlJobScheduler.getExecutorBiz(appname, address);
-            runResult = executorClient.run(triggerParam);
+            runResult = executorClient.run(triggerParam).get();
         } catch (Exception e) {
-            logger.error(">>>>>>>>>>> xxl-job trigger error, please check if the executor[{}] is running.", address, e);
-            runResult = new ReturnT<String>(ReturnT.FAIL_CODE, ThrowableUtil.toString(e));
+            log.error(">>>>>>>>>>> xxl-job trigger error, please check if the executor[{}] is running.", address, e);
+            runResult = new ReturnT(ReturnT.FAIL_CODE, ThrowableUtil.toString(e));
         }
 
         StringBuffer runResultSB = new StringBuffer(I18nUtil.getString("jobconf_trigger_run") + "：");

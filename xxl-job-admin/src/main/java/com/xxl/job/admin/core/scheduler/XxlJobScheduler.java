@@ -6,22 +6,20 @@ import com.xxl.job.admin.core.util.I18nUtil;
 import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.remote.client.ExecutorClient;
 import com.xxl.job.remote.ExecutorService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-/**
- * @author xuxueli 2018-10-28 00:18:17
- */
+@Slf4j
+public class XxlJobScheduler implements InitializingBean, DisposableBean {
 
-public class XxlJobScheduler  {
-    private static final Logger logger = LoggerFactory.getLogger(XxlJobScheduler.class);
+    private static ConcurrentMap<String, ExecutorService> executorBizRepository = new ConcurrentHashMap();
 
-
-    public void init() throws Exception {
-        // init i18n
+    @Override
+    public void afterPropertiesSet() throws Exception {
         initI18n();
 
         // admin trigger pool start
@@ -42,10 +40,9 @@ public class XxlJobScheduler  {
         // start-schedule  ( depend on JobTriggerPoolHelper )
         JobScheduleHelper.getInstance().start();
 
-        logger.info(">>>>>>>>> init xxl-job admin success.");
+        log.info(">>>>>>>>> init xxl-job admin success.");
     }
 
-    
     public void destroy() throws Exception {
 
         // stop-schedule
@@ -68,19 +65,15 @@ public class XxlJobScheduler  {
 
     }
 
-    // ---------------------- I18n ----------------------
-
-    private void initI18n(){
-        for (ExecutorBlockStrategyEnum item:ExecutorBlockStrategyEnum.values()) {
+    private void initI18n() {
+        for (ExecutorBlockStrategyEnum item : ExecutorBlockStrategyEnum.values()) {
             item.setTitle(I18nUtil.getString("jobconf_block_".concat(item.name())));
         }
     }
 
-    // ---------------------- executor-client ----------------------
-    private static ConcurrentMap<String, ExecutorService> executorBizRepository = new ConcurrentHashMap();
     public static ExecutorService getExecutorBiz(String appname, String address) throws Exception {
         // valid
-        if (address==null || address.trim().length()==0) {
+        if (address == null || address.trim().length() == 0) {
             return null;
         }
 

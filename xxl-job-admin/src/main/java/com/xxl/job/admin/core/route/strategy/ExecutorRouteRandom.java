@@ -7,9 +7,6 @@ import com.xxl.job.remote.protocol.request.TriggerParam;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Created by xuxueli on 17/3/10.
- */
 public class ExecutorRouteRandom extends ExecutorRouter {
 
     private static Random localRandom = new Random();
@@ -17,7 +14,7 @@ public class ExecutorRouteRandom extends ExecutorRouter {
     @Override
     public ReturnT<String> route(TriggerParam triggerParam, String appname, List<String> addressList) {
         String address = addressList.get(localRandom.nextInt(addressList.size()));
-        return new ReturnT<String>(address);
+        return new ReturnT(address);
     }
 
 }

@@ -34,13 +34,6 @@ public class JobAlarmer implements ApplicationContextAware, InitializingBean {
         }
     }
 
-    /**
-     * job alarm
-     *
-     * @param info
-     * @param jobLog
-     * @return
-     */
     public boolean alarm(XxlJobInfo info, XxlJobLog jobLog) {
 
         boolean result = false;

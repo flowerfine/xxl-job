@@ -16,9 +16,6 @@ import com.xxl.job.remote.protocol.ReturnT;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.DigestUtils;
 
-/**
- * @author xuxueli 2019-05-04 22:13:264
- */
 @Configuration
 public class LoginService {
 
@@ -67,23 +64,11 @@ public class LoginService {
         return ReturnT.SUCCESS;
     }
 
-    /**
-     * logout
-     *
-     * @param request
-     * @param response
-     */
     public ReturnT<String> logout(HttpServletRequest request, HttpServletResponse response) {
         CookieUtil.remove(request, response, LOGIN_IDENTITY_KEY);
         return ReturnT.SUCCESS;
     }
 
-    /**
-     * logout
-     *
-     * @param request
-     * @return
-     */
     public XxlJobUser ifLogin(HttpServletRequest request, HttpServletResponse response) {
         String cookieToken = CookieUtil.getValue(request, LOGIN_IDENTITY_KEY);
         if (cookieToken != null) {

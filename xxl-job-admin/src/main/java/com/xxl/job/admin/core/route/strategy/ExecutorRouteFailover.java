@@ -9,9 +9,6 @@ import com.xxl.job.remote.protocol.request.TriggerParam;
 
 import java.util.List;
 
-/**
- * Created by xuxueli on 17/3/10.
- */
 public class ExecutorRouteFailover extends ExecutorRouter {
 
     @Override
@@ -23,10 +20,10 @@ public class ExecutorRouteFailover extends ExecutorRouter {
             ReturnT<String> beatResult = null;
             try {
                 ExecutorService executorBiz = XxlJobScheduler.getExecutorBiz(appname, address);
-                beatResult = executorBiz.beat();
+                beatResult = executorBiz.beat().get();
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                beatResult = new ReturnT<String>(ReturnT.FAIL_CODE, "" + e);
+                beatResult = new ReturnT(ReturnT.FAIL_CODE, "" + e);
             }
             beatResultSB.append((beatResultSB.length() > 0) ? "<br><br>" : "")
                     .append(I18nUtil.getString("jobconf_beat") + "：")
@@ -42,7 +39,7 @@ public class ExecutorRouteFailover extends ExecutorRouter {
                 return beatResult;
             }
         }
-        return new ReturnT<String>(ReturnT.FAIL_CODE, beatResultSB.toString());
+        return new ReturnT(ReturnT.FAIL_CODE, beatResultSB.toString());
 
     }
 }

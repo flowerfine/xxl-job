@@ -10,13 +10,21 @@ public class ActorSelectionHelper {
     public static final String ACTOR_SYSTEM = "xxl-job";
     public static final int PORT = 20777;
 
-    private static final String AKKA_PATH_TEMPLATE = "akka://${actorSystem}@${host}:${port}/${actorPath}";
+    private static final String AKKA_PATH_TEMPLATE = "akka://${actorSystem}@${address}";
     private static final String AKKA_USER_PATH = "akka://${actorSystem}@${host}:${port}/user/${actorPath}";
     private static final String XXL_JOB_ADMIN_PATH = "akka://${actorSystem}@${host}:${port}/user/admin/${actorPath}";
     private static final String XXL_JOB_EXECUTOR_PATH = "akka://${actorSystem}@${host}:${port}/user/executor/${actorPath}";
 
     private ActorSelectionHelper() {
         throw new IllegalStateException("no instance");
+    }
+
+    public static String getAppnameAddress(String actorSystem, String address) {
+        Map<String, String> substitutes = new HashMap<>();
+        substitutes.put("actorSystem", actorSystem);
+        substitutes.put("address", address);
+        StringSubstitutor substitutor = new StringSubstitutor(substitutes);
+        return substitutor.replace(AKKA_PATH_TEMPLATE);
     }
 
     public static String getAdminRouterPath(String host, String path) {

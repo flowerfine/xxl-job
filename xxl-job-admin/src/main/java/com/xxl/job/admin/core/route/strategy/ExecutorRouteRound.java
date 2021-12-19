@@ -10,9 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by xuxueli on 17/3/10.
- */
 public class ExecutorRouteRound extends ExecutorRouter {
 
     private static ConcurrentMap<Integer, AtomicInteger> routeCountEachJob = new ConcurrentHashMap<>();
@@ -40,7 +37,7 @@ public class ExecutorRouteRound extends ExecutorRouter {
     @Override
     public ReturnT<String> route(TriggerParam triggerParam, String appname, List<String> addressList) {
         String address = addressList.get(count(triggerParam.getJobId()) % addressList.size());
-        return new ReturnT<String>(address);
+        return new ReturnT(address);
     }
 
 }

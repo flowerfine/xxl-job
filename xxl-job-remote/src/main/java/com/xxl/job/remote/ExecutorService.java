@@ -7,15 +7,17 @@ import com.xxl.job.remote.protocol.request.LogParam;
 import com.xxl.job.remote.protocol.request.TriggerParam;
 import com.xxl.job.remote.protocol.response.LogResult;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface ExecutorService {
 
-    ReturnT<String> beat();
+    CompletableFuture<ReturnT<String>> beat();
 
-    ReturnT<String> idleBeat(IdleBeatParam idleBeatParam);
+    CompletableFuture<ReturnT<String>> idleBeat(IdleBeatParam idleBeatParam);
 
-    ReturnT<String> run(TriggerParam triggerParam);
+    CompletableFuture<ReturnT<String>> run(TriggerParam triggerParam);
 
-    ReturnT<String> kill(KillParam killParam);
+    CompletableFuture<ReturnT<String>> kill(KillParam killParam);
 
-    ReturnT<LogResult> log(LogParam logParam);
+    CompletableFuture<ReturnT<LogResult>> log(LogParam logParam);
 }
