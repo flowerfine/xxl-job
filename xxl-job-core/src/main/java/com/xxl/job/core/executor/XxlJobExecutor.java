@@ -18,6 +18,7 @@ import com.xxl.job.core.biz.client.AdminBizClient;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.core.log.XxlJobFileAppender;
 import com.xxl.job.core.server.AkkaServer;
+import com.xxl.job.core.thread.ExecutorRegistryTask;
 import com.xxl.job.core.thread.JobLogFileCleanTask;
 import com.xxl.job.core.thread.JobThread;
 import com.xxl.job.core.thread.TriggerCallbackThread;
@@ -38,6 +39,7 @@ public class XxlJobExecutor {
 
     private ActorSystem<SpawnProtocol.Command> actorSystem;
 
+    private ExecutorRegistryTask executorRegistryTask;
     private JobLogFileCleanTask jobLogFileCleanTask;
 
     private String adminAddresses;
@@ -86,6 +88,8 @@ public class XxlJobExecutor {
         Config config = ConfigFactory.load("xxl-job-executor.conf");
         actorSystem = ActorSystem.create(Behaviors.setup(ctx -> SpawnProtocol.create()), "xxl-job", config);
 
+        executorRegistryTask = new ExecutorRegistryTask(appname, address);
+        executorRegistryTask.start();
         // init logpath
         XxlJobFileAppender.initLogPath(logPath);
 
@@ -113,6 +117,7 @@ public class XxlJobExecutor {
             }
             return done.get();
         }, actorSystem.executionContext());
+        executorRegistryTask.toStop();
 
         // destory jobThreadRepository
         if (jobThreadRepository.size() > 0) {
