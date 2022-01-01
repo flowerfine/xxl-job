@@ -171,6 +171,7 @@ public class XxlJobExecutor implements InitializingBean, DisposableBean {
     }
 
     private void initAkkaServer() throws Exception {
+        System.out.println("开始启动 akka server");
         this.akkaServer = new AkkaServer(actorSystem);
     }
 
