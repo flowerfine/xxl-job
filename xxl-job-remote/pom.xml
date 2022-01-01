@@ -12,23 +12,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-remote_${scala.binary.version}</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-serialization-jackson_${scala.binary.version}</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-text</artifactId>
-            <version>1.9</version>
+            <groupId>com.xuxueli</groupId>
+            <artifactId>xxl-job-rpc</artifactId>
         </dependency>
     </dependencies>
 

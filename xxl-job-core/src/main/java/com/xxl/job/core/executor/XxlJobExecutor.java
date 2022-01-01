@@ -1,16 +1,8 @@
 package com.xxl.job.core.executor;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.Props;
-import akka.actor.typed.javadsl.AskPattern;
+import akka.actor.typed.ActorSystem;
+import akka.actor.typed.SpawnProtocol;
+import akka.actor.typed.javadsl.Behaviors;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.xxl.job.core.biz.AdminBiz;
@@ -22,16 +14,18 @@ import com.xxl.job.core.thread.ExecutorRegistryTask;
 import com.xxl.job.core.thread.JobLogFileCleanTask;
 import com.xxl.job.core.thread.JobThread;
 import com.xxl.job.core.thread.TriggerCallbackThread;
-
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import akka.actor.typed.ActorSystem;
-import akka.actor.typed.SpawnProtocol;
-import akka.actor.typed.javadsl.Behaviors;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * xxl-job executor.
@@ -42,6 +36,7 @@ public class XxlJobExecutor implements InitializingBean, DisposableBean {
 
     @Getter
     private ActorSystem<SpawnProtocol.Command> actorSystem;
+    private AkkaServer akkaServer;
 
     private ExecutorRegistryTask executorRegistryTask;
     private JobLogFileCleanTask jobLogFileCleanTask;
@@ -176,12 +171,7 @@ public class XxlJobExecutor implements InitializingBean, DisposableBean {
     }
 
     private void initAkkaServer() throws Exception {
-        CompletionStage<ActorRef<AkkaServer.Command>> future = AskPattern.ask(
-                actorSystem,
-                replyTo -> new SpawnProtocol.Spawn<>(Behaviors.setup(ctx -> new AkkaServer(ctx, appname)),"AkkaServer", Props.empty(), replyTo),
-                Duration.ofSeconds(5L),
-                actorSystem.scheduler()
-        );
+        this.akkaServer = new AkkaServer(actorSystem);
     }
 
     // ---------------------- job handler repository ----------------------
@@ -203,7 +193,7 @@ public class XxlJobExecutor implements InitializingBean, DisposableBean {
         JobThread newJobThread = new JobThread(jobId, handler);
         newJobThread.start();
         logger.info(">>>>>>>>>>> xxl-job regist JobThread success, jobId:{}, handler:{}",
-                new Object[] { jobId, handler });
+                new Object[]{jobId, handler});
         return newJobThread;
     }
 

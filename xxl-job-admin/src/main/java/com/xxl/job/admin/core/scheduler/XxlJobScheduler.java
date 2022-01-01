@@ -1,22 +1,16 @@
 package com.xxl.job.admin.core.scheduler;
 
-import akka.actor.typed.ActorRef;
 import akka.actor.typed.ActorSystem;
-import akka.actor.typed.Props;
 import akka.actor.typed.SpawnProtocol;
-import akka.actor.typed.javadsl.AskPattern;
-import akka.actor.typed.javadsl.Behaviors;
-import com.xxl.job.core.remote.client.ExecutorBehavior;
-import com.xxl.job.core.remote.client.ExecutorClient;
-import com.xxl.job.core.server.AkkaServer;
 import com.xxl.job.remote.ExecutorService;
+import com.xxl.job.rpc.ActorSelectionHelper;
+import com.xxl.job.rpc.AkkaRpcService;
+import com.xxl.job.rpc.RpcService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.time.Duration;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -26,11 +20,11 @@ public class XxlJobScheduler {
 
     private static ConcurrentMap<String, ConcurrentMap<String, ExecutorService>> executorMap = new ConcurrentHashMap<>();
 
-    private static ActorSystem<SpawnProtocol.Command> actorSystem;
+    private static RpcService rpcService;
 
     @Autowired
     public void setActorSystem(ActorSystem<SpawnProtocol.Command> actorSystem) {
-        XxlJobScheduler.actorSystem = actorSystem;
+        XxlJobScheduler.rpcService = new AkkaRpcService(actorSystem);
     }
 
     public static ExecutorService getExecutorBiz(String appname, String address) throws Exception {
@@ -47,22 +41,10 @@ public class XxlJobScheduler {
             return executorBiz;
         }
 
-        String actorName = "Executor-" + appname + "-" + address;
-        CompletionStage<ActorRef<ExecutorBehavior.Command>> registered =
-                AskPattern.ask(
-                        actorSystem,
-                        replyTo -> new SpawnProtocol.Spawn<>(Behaviors.setup(ctx -> new ExecutorBehavior(ctx, appname, address)), actorName, Props.empty(), replyTo),
-                        Duration.ofSeconds(3L),
-                        actorSystem.scheduler());
-        ActorRef<ExecutorBehavior.Command> actorRef = registered.toCompletableFuture().get();
-        CompletionStage<ActorRef<AkkaServer.Command>> client =
-                AskPattern.ask(
-                        actorRef,
-                        replyTo -> new ExecutorBehavior.RemoteActorCommand(replyTo),
-                        Duration.ofSeconds(3L),
-                        actorSystem.scheduler());
+        String host = ActorSelectionHelper.getIp(address);
+        int port = ActorSelectionHelper.getPort(address);
 
-        executorBiz = new ExecutorClient(actorSystem, client.toCompletableFuture().get());
+        executorBiz = rpcService.connect(host, port, ActorSelectionHelper.EXECUTOR_ENDPOINT, ExecutorService.class);
         addressMap.put(address, executorBiz);
         return executorBiz;
     }

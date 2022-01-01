@@ -8,6 +8,8 @@ import java.util.Map;
 public class ActorSelectionHelper {
 
     public static final String ACTOR_SYSTEM = "akka-rpc";
+    public static final String EXECUTOR_ENDPOINT = "executor";
+    public static final String ADMIN_ENDPOINT = "admin";
     public static final int PORT = 20777;
 
     private static final String AKKA_PATH_TEMPLATE = "akka://${actorSystem}@${address}";
@@ -39,6 +41,28 @@ public class ActorSelectionHelper {
         }
 
         return subStr;
+    }
+
+    public static String getIp(String address) {
+        if (address == null || address.isEmpty()) {
+            return "";
+        }
+        int index = address.indexOf(":");
+        if (index > 0) {
+            return address.substring(0, index);
+        }
+        return "";
+    }
+
+    public static int getPort(String address) {
+        if (address == null || address.isEmpty()) {
+            return -1;
+        }
+        int index = address.indexOf(":");
+        if (index > 0) {
+            return Integer.parseInt(address.substring(index));
+        }
+        return -1;
     }
 
     private static Map<String, String> wrapSubstitute(String host, int port, String actorPath) {
