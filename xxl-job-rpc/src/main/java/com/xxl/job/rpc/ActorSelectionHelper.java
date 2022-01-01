@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class ActorSelectionHelper {
 
-    public static final String ACTOR_SYSTEM = "akka-rpc";
+    public static final String ACTOR_SYSTEM = "xxl-job";
     public static final String EXECUTOR_ENDPOINT = "executor";
     public static final String ADMIN_ENDPOINT = "admin";
     public static final int PORT = 20777;
@@ -60,7 +60,7 @@ public class ActorSelectionHelper {
         }
         int index = address.indexOf(":");
         if (index > 0) {
-            return Integer.parseInt(address.substring(index));
+            return Integer.parseInt(address.substring(index + 1));
         }
         return -1;
     }

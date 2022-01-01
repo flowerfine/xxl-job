@@ -14,6 +14,7 @@ import com.xxl.job.core.thread.ExecutorRegistryTask;
 import com.xxl.job.core.thread.JobLogFileCleanTask;
 import com.xxl.job.core.thread.JobThread;
 import com.xxl.job.core.thread.TriggerCallbackThread;
+import com.xxl.job.rpc.util.AkkaUtil;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,8 +87,7 @@ public class XxlJobExecutor implements InitializingBean, DisposableBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Config config = ConfigFactory.load("xxl-job-executor.conf");
-        actorSystem = ActorSystem.create(Behaviors.setup(ctx -> SpawnProtocol.create()), "xxl-job", config);
+        actorSystem = AkkaUtil.startProviderActorSystem();
 
         // init logpath
         XxlJobFileAppender.initLogPath(logPath);
