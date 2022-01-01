@@ -17,6 +17,7 @@
 		<module>xxl-job-spring-boot-autoconfigure</module>
 		<module>xxl-job-spring-boot-starter</module>
 		<module>xxl-job-remote</module>
+		<module>xxl-job-rpc</module>
 	</modules>
 
 	<properties>
@@ -53,6 +54,11 @@
 			<dependency>
 				<groupId>com.xuxueli</groupId>
 				<artifactId>xxl-job-dao</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.xuxueli</groupId>
+				<artifactId>xxl-job-rpc</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
