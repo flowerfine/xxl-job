@@ -1,27 +1,20 @@
 package com.xxl.job.core.handler;
 
-/**
- * job handler
- */
-public abstract class IJobHandler {
+import com.xxl.job.remote.protocol.ReturnT;
 
-	/**
-	 * execute handler, invoked when executor receives a scheduling request
-	 */
-	public abstract void execute() throws Exception;
+public interface IJobHandler {
 
-	/**
-	 * init handler, invoked when JobThread init
-	 */
-	public void init() throws Exception {
+	default void init() throws Exception {
 		// do something
 	}
 
-	/**
-	 * destroy handler, invoked when JobThread destroy
-	 */
-	public void destroy() throws Exception {
+	default void destroy() throws Exception {
 		// do something
 	}
 
+    void execute() throws Exception;
+
+    default ReturnT<String> kill() throws Exception {
+    	return new ReturnT<>(ReturnT.FAIL_CODE, "job killed");
+	}
 }
