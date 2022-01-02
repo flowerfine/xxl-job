@@ -1,10 +1,8 @@
 package com.xxl.job.remote.protocol;
 
-import java.io.Serializable;
+import com.xxl.job.rpc.message.Message;
 
-public class ReturnT<T> implements Serializable {
-
-    public static final long serialVersionUID = 42L;
+public class ReturnT<T> implements Message {
 
     public static final int SUCCESS_CODE = 200;
     public static final int FAIL_CODE = 500;

@@ -1,7 +1,7 @@
 package com.xxl.job.remote.protocol;
 
-import java.io.Serializable;
+import com.xxl.job.rpc.message.Message;
 
-public class Request implements Serializable {
+public class Request implements Message {
 
 }
