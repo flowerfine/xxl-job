@@ -45,6 +45,11 @@
 
         <dependency>
             <groupId>cn.sliew</groupId>
+            <artifactId>milky-common</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.sliew</groupId>
             <artifactId>milky-serialize-protostuff</artifactId>
             <version>1.0.2</version>
         </dependency>

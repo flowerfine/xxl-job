@@ -1,11 +1,14 @@
 package com.xxl.job.core.log;
 
+import com.xxl.job.core.util.DateUtil;
 import com.xxl.job.remote.protocol.response.LogResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 
 /**
@@ -61,21 +64,13 @@ public class XxlJobFileAppender {
     /**
      * log filename, like "logPath/yyyy-MM-dd/9999.log"
      */
-    public static String makeLogFileName(Date triggerDate, long logId) {
-
-        // filePath/yyyy-MM-dd
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");    // avoid concurrent problem, can not be static
-        File logFilePath = new File(getLogPath(), sdf.format(triggerDate));
-        if (!logFilePath.exists()) {
-            logFilePath.mkdir();
+    public static String makeLogFileName(Date triggerDate, long logId) throws IOException {
+        Path path = Paths.get(getLogPath(), DateUtil.formatDate(triggerDate));
+        if (Files.notExists(path)) {
+            Files.createDirectories(path);
         }
 
-        // filePath/yyyy-MM-dd/9999.log
-        String logFileName = logFilePath.getPath()
-                .concat(File.separator)
-                .concat(String.valueOf(logId))
-                .concat(".log");
-        return logFileName;
+        return path.resolve(String.format("%d.log", logId)).toAbsolutePath().toString();
     }
 
     /**

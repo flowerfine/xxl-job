@@ -18,7 +18,8 @@
 		<module>xxl-job-spring-boot-starter</module>
 		<module>xxl-job-remote</module>
 		<module>xxl-job-rpc</module>
-	</modules>
+        <module>xxl-job-executor</module>
+    </modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -150,7 +150,7 @@ public class JobLogController {
         try {
             XxlJobGroup group = xxlJobGroupDao.load(jobGroup);
             ExecutorService executorBiz = xxlJobScheduler.getExecutorBiz(group.getAppname(), executorAddress);
-            ReturnT<LogResult> logResult = executorBiz.log(new LogParam(triggerTime, logId, fromLineNum)).get();
+            ReturnT<LogResult> logResult = executorBiz.log(new LogParam(logId, triggerTime, fromLineNum)).get();
             // is end
             if (logResult.getContent() != null
                     && logResult.getContent().getFromLineNum() > logResult.getContent().getToLineNum()) {
