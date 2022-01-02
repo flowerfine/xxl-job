@@ -7,10 +7,14 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.pattern.StatusReply;
 import com.xxl.job.rpc.message.Message;
+import com.xxl.job.rpc.message.protocol.RpcInvocation;
 import com.xxl.job.rpc.message.protocol.RpcRequest;
 import com.xxl.job.rpc.message.protocol.RpcResponse;
 
 import java.lang.reflect.Method;
+
+import static com.xxl.job.rpc.util.CodecUtil.deserialize;
+import static com.xxl.job.rpc.util.CodecUtil.serialize;
 
 public class AkkaEndpointBehavior<C> extends AbstractBehavior<Message> {
 
@@ -31,16 +35,22 @@ public class AkkaEndpointBehavior<C> extends AbstractBehavior<Message> {
     }
 
     public Behavior<Message> onRpc(RpcRequest request) {
-        getContext().getLog().info("收到 rpc 请求! className: {}, methodName: {}, parameterTypes: {}, args: {}",
-                request.getClassName(), request.getMethodName(), request.getParameterTypes(), request.getArgs());
+        RpcInvocation invocation;
         try {
-            Method method = clazz.getDeclaredMethod(request.getMethodName(), request.getParameterTypes());
+            invocation = deserialize(request.getMsg());
+        } catch (Exception e) {
+            getContext().getLog().error("反序列化 rpc 请求失败!", e);
+            request.getReplyTo().tell(StatusReply.error(e));
+            return Behaviors.same();
+        }
+        try {
+            Method method = clazz.getDeclaredMethod(invocation.getMethodName(), invocation.getParameterTypes());
             method.setAccessible(true);
-            Object result = method.invoke(endpoint, request.getArgs());
-            request.getReplyTo().tell(StatusReply.success(new RpcResponse(result, null)));
+            Object result = method.invoke(endpoint, invocation.getArgs());
+            request.getReplyTo().tell(StatusReply.success(new RpcResponse(serialize(result), null)));
         } catch (Exception e) {
             getContext().getLog().error("处理 rpc 请求失败! methodName: {}, parameterTypes: {}, args: {}",
-                    request.getMethodName(), request.getParameterTypes(), request.getArgs(), e);
+                    invocation.getMethodName(), invocation.getParameterTypes(), invocation.getArgs(), e);
             request.getReplyTo().tell(StatusReply.error(e));
         }
         return Behaviors.same();

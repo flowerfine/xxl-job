@@ -12,6 +12,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RpcResponse implements RpcProtocol {
 
-    private Object result;
+    private byte[] msg;
     private Throwable throwable;
 }

@@ -1,15 +1,15 @@
-package com.xxl.job.rpc.message;
+package com.xxl.job.rpc.message.protocol;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RpcInvocation implements Message {
+public class RpcInvocation {
 
     private String className;
     private String methodName;

@@ -18,6 +18,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
+import static com.xxl.job.rpc.util.CodecUtil.deserialize;
+
 public class AkkaInvocationHandler implements InvocationHandler {
 
     private final ActorSystem actorSystem;
@@ -53,7 +55,7 @@ public class AkkaInvocationHandler implements InvocationHandler {
         if (method.getReturnType().equals(Void.TYPE)) {
             return null;
         } else {
-            return response.getResult();
+            return deserialize(response.getMsg());
         }
     }
 

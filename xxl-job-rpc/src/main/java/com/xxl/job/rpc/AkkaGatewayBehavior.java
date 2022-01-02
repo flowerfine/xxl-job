@@ -7,12 +7,16 @@ import akka.actor.typed.javadsl.*;
 import akka.pattern.StatusReply;
 import com.xxl.job.rpc.message.Message;
 import com.xxl.job.rpc.message.RpcInvocationCommand;
+import com.xxl.job.rpc.message.protocol.RpcInvocation;
 import com.xxl.job.rpc.message.protocol.RpcRequest;
 import com.xxl.job.rpc.message.protocol.RpcResponse;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+
+import static com.xxl.job.rpc.util.CodecUtil.serialize;
 
 public class AkkaGatewayBehavior extends AbstractBehavior<Message> {
 
@@ -39,15 +43,20 @@ public class AkkaGatewayBehavior extends AbstractBehavior<Message> {
     }
 
     private Behavior<Message> onRpc(RpcInvocationCommand invocation) {
+        byte[] bytes;
+        try {
+            RpcInvocation rpcInvocation = new RpcInvocation(invocation.getClassName(), invocation.getMethodName(), invocation.getParameterTypes(), invocation.getArgs());
+            bytes = serialize(rpcInvocation);
+        } catch (IOException e) {
+            getContext().getLog().error("序列化 rpc 消息失败! methodName: {}, parameterTypes: {}, args: {}" +
+                    invocation.getMethodName(), invocation.getParameterTypes(), invocation.getArgs(), e);
+            invocation.getReplyTo().tell(StatusReply.error(e));
+            return Behaviors.same();
+        }
         getContext().askWithStatus(RpcResponse.class,
                 remote,
                 Duration.ofSeconds(3L),
-                replyTo -> new RpcRequest(
-                        invocation.getClassName(),
-                        invocation.getMethodName(),
-                        invocation.getParameterTypes(),
-                        invocation.getArgs(),
-                        replyTo),
+                replyTo -> new RpcRequest(bytes, replyTo),
                 (result, throwable) -> {
                     if (throwable != null) {
                         invocation.getReplyTo().tell(StatusReply.error(throwable));

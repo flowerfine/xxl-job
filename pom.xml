@@ -28,7 +28,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<maven.test.skip>true</maven.test.skip>
 
-		<java.version>1.8</java.version>
+		<java.version>11</java.version>
 		<akka.version>2.6.15</akka.version>
 		<scala.version>2.13.0</scala.version>
 		<scala.binary.version>2.13</scala.binary.version>

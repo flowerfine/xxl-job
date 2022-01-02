@@ -44,6 +44,12 @@
         </dependency>
 
         <dependency>
+            <groupId>cn.sliew</groupId>
+            <artifactId>milky-serialize-protostuff</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
@@ -54,6 +60,13 @@
             <version>1.9</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>aliyun-maven-central</id>
+            <url>https://maven.aliyun.com/repository/central</url>
+        </repository>
+    </repositories>
 
 
 </project>

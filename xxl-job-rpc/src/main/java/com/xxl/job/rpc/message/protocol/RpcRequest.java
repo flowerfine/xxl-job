@@ -14,9 +14,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RpcRequest implements RpcProtocol {
 
-    private String className;
-    private String methodName;
-    private Class<?>[] parameterTypes;
-    private Object[] args;
+    private byte[] msg;
     private ActorRef<StatusReply<RpcResponse>> replyTo;
 }
