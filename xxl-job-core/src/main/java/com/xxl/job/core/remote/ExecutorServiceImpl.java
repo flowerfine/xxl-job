@@ -18,6 +18,7 @@ import com.xxl.job.remote.protocol.request.TriggerParam;
 import com.xxl.job.remote.protocol.response.LogResult;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 
@@ -169,10 +170,14 @@ public class ExecutorServiceImpl implements ExecutorService {
 
     @Override
     public CompletableFuture<ReturnT<LogResult>> log(LogParam logParam) {
-        // log filename: logPath/yyyy-MM-dd/9999.log
-        String logFileName = XxlJobFileAppender.makeLogFileName(new Date(logParam.getLogDateTim()), logParam.getLogId());
+        try {
+            // log filename: logPath/yyyy-MM-dd/9999.log
+            String logFileName = XxlJobFileAppender.makeLogFileName(new Date(logParam.getLogDateTim()), logParam.getLogId());
 
-        LogResult logResult = XxlJobFileAppender.readLog(logFileName, logParam.getFromLineNum());
-        return CompletableFuture.completedFuture(new ReturnT(logResult));
+            LogResult logResult = XxlJobFileAppender.readLog(logFileName, logParam.getFromLineNum());
+            return CompletableFuture.completedFuture(new ReturnT(logResult));
+        } catch (IOException e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 }

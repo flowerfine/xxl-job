@@ -7,28 +7,36 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-import akka.pattern.StatusReply;
+import com.xxl.job.core.biz.client.AdminBizClient;
 import com.xxl.job.core.handler.IJobHandler;
+import com.xxl.job.core.util.JacksonUtil;
 import com.xxl.job.remote.protocol.ReturnT;
 import com.xxl.job.remote.protocol.request.TriggerParam;
 
 import java.io.Serializable;
+import java.time.Duration;
 
 public class JobHandlerProxy extends AbstractBehavior<JobHandlerProxy.Command> {
 
     private final long jobId;
     private final IJobHandler jobHandler;
+    private final ActorRef<JobCallbackBehavior.Command> jobCallbackActor;
 
-    private ActorRef<TriggerParam> jobHandlerActor;
+    private ActorRef<JobHandler.Command> jobHandlerActor;
 
-    public JobHandlerProxy(ActorContext<Command> context, long jobId, IJobHandler jobHandler) {
+
+    private volatile State state;
+
+    public JobHandlerProxy(ActorContext<Command> context, long jobId, IJobHandler jobHandler, ActorRef<JobCallbackBehavior.Command> jobCallbackActor) {
         super(context);
         this.jobId = jobId;
         this.jobHandler = jobHandler;
+        this.jobCallbackActor = jobCallbackActor;
 
-        Behavior<TriggerParam> jobHanderBehavior = Behaviors.setup(ctx -> new JobHandler(ctx, jobHandler, context.getSelf()));
-        Behavior<TriggerParam> suprevisedBehavior = Behaviors.supervise(jobHanderBehavior).onFailure(SupervisorStrategy.restart());
+        Behavior<JobHandler.Command> jobHanderBehavior = Behaviors.setup(ctx -> new JobHandler(ctx, jobHandler));
+        Behavior<JobHandler.Command> suprevisedBehavior = Behaviors.supervise(jobHanderBehavior).onFailure(SupervisorStrategy.restart());
         this.jobHandlerActor = context.spawn(suprevisedBehavior, String.valueOf(jobId));
+        this.state = State.IDLE;
     }
 
     @Override
@@ -62,7 +70,15 @@ public class JobHandlerProxy extends AbstractBehavior<JobHandlerProxy.Command> {
     }
 
     public Behavior<Command> onTrigger(TriggerCommand command) {
-        jobHandlerActor.tell(command.param);
+        TriggerParam param = command.param;
+        Duration timeout = Duration.ofDays(1000L);
+        if (param.getExecutorTimeout() > 0) {
+            timeout = Duration.ofSeconds(param.getExecutorTimeout());
+        }
+
+        getContext().askWithStatus(ReturnT.class, jobHandlerActor, timeout,
+                replyTo -> new JobHandler.TriggerCommand(param, replyTo), (returnT, throwable) -> new TriggerReturnTWrapper(param, returnT, throwable));
+
         return newReceiveBuilder()
                 .onMessageEquals(DestroyCommand.INSTANCE, this::onDestroy)
                 .onMessageEquals(KillCommand.INSTANCE, this::onKill)
@@ -72,7 +88,15 @@ public class JobHandlerProxy extends AbstractBehavior<JobHandlerProxy.Command> {
 
     public Behavior<Command> onTriggerReturnT(TriggerReturnTWrapper wrapper) {
         if (wrapper.throwable != null) {
-
+            getContext().getLog().error("处理任务失败！", wrapper.throwable);
+        } else {
+            getContext().getLog().info("处理任务成功！returnT: {}", JacksonUtil.toJsonString(wrapper.returnT));
+            jobCallbackActor.tell(
+                    new JobCallbackBehavior.CallbackCommand(
+                            wrapper.param.getLogId(),
+                            wrapper.param.getLogDateTime(),
+                            wrapper.returnT.getCode(),
+                            wrapper.returnT.getMsg()));
         }
         return newReceiveBuilder()
                 .onMessageEquals(DestroyCommand.INSTANCE, this::onDestroy)
@@ -83,7 +107,8 @@ public class JobHandlerProxy extends AbstractBehavior<JobHandlerProxy.Command> {
     public Behavior<Command> onKill() {
         try {
             jobHandler.kill();
-            // 终止 第三个 actor
+            getContext().stop(jobHandlerActor);
+            this.jobHandlerActor = null;
         } catch (Exception e) {
             getContext().getLog().error(">>>>>>>>>>> xxl-job kill jobHandler 异常! jobId: {}", jobId, e);
             return Behaviors.stopped();
@@ -107,19 +132,19 @@ public class JobHandlerProxy extends AbstractBehavior<JobHandlerProxy.Command> {
 
     public static class TriggerCommand implements Command {
         private final TriggerParam param;
-        private final ActorRef<StatusReply<ReturnT>> replyTo;
 
-        public TriggerCommand(TriggerParam param, ActorRef<StatusReply<ReturnT>> replyTo) {
+        public TriggerCommand(TriggerParam param) {
             this.param = param;
-            this.replyTo = replyTo;
         }
     }
 
     public static class TriggerReturnTWrapper implements Command {
+        private final TriggerParam param;
         private final ReturnT returnT;
         private final Throwable throwable;
 
-        public TriggerReturnTWrapper(ReturnT returnT, Throwable throwable) {
+        public TriggerReturnTWrapper(TriggerParam param, ReturnT returnT, Throwable throwable) {
+            this.param = param;
             this.returnT = returnT;
             this.throwable = throwable;
         }

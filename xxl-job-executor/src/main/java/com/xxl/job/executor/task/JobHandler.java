@@ -6,37 +6,54 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import akka.pattern.StatusReply;
 import com.xxl.job.core.handler.IJobHandler;
 import com.xxl.job.remote.protocol.ReturnT;
 import com.xxl.job.remote.protocol.request.TriggerParam;
 
-public class JobHandler extends AbstractBehavior<TriggerParam> {
+import java.io.Serializable;
+
+public class JobHandler extends AbstractBehavior<JobHandler.Command> {
 
     private final IJobHandler jobHandler;
-    private final ActorRef<JobHandlerProxy.Command> proxy;
 
-    public JobHandler(ActorContext<TriggerParam> context, IJobHandler jobHandler, ActorRef<JobHandlerProxy.Command> proxy) {
+    public JobHandler(ActorContext<Command> context, IJobHandler jobHandler) {
         super(context);
         this.jobHandler = jobHandler;
-        this.proxy = proxy;
     }
 
     @Override
-    public Receive<TriggerParam> createReceive() {
+    public Receive<Command> createReceive() {
         return newReceiveBuilder()
-                .onMessage(TriggerParam.class, this::onTrigger)
+                .onMessage(TriggerCommand.class, this::onTrigger)
                 .build();
     }
 
-    public Behavior<TriggerParam> onTrigger(TriggerParam param) {
+    public Behavior<Command> onTrigger(TriggerCommand command) {
         try {
             jobHandler.execute();
-            proxy.tell(new JobHandlerProxy.TriggerReturnTWrapper(ReturnT.SUCCESS, null));
+            command.replyTo.tell(StatusReply.success(ReturnT.SUCCESS));
         } catch (Exception e) {
             getContext().getLog().error(">>>>>>>>>>> xxl-job 执行 jobHandler 异常! actorPath: {}", getContext().getSelf().path(), e);
-            proxy.tell(new JobHandlerProxy.TriggerReturnTWrapper(null, e));
+            command.replyTo.tell(StatusReply.error(e));
             return Behaviors.stopped();
         }
         return Behaviors.same();
     }
+
+    public interface Command extends Serializable {
+
+    }
+
+    public static class TriggerCommand implements Command {
+        private final TriggerParam param;
+        private final ActorRef<StatusReply<ReturnT>> replyTo;
+
+        public TriggerCommand(TriggerParam param, ActorRef<StatusReply<ReturnT>> replyTo) {
+            this.param = param;
+            this.replyTo = replyTo;
+        }
+    }
+
+
 }

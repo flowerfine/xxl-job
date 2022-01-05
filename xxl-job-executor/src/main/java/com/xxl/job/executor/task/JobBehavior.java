@@ -13,14 +13,8 @@ import com.xxl.job.remote.protocol.ReturnT;
 import com.xxl.job.remote.protocol.request.TriggerParam;
 
 import java.io.Serializable;
-import java.time.Duration;
 
-/**
- * fixme job context
- */
 public class JobBehavior extends AbstractBehavior<JobBehavior.Command> {
-
-    private final TimeoutCommand TIMEOUT = new TimeoutCommand();
 
     private ActorRef<JobHandlerProxy.Command> jobHandler;
     private ActorRef<JobCallbackBehavior.Command> callback;
@@ -28,9 +22,13 @@ public class JobBehavior extends AbstractBehavior<JobBehavior.Command> {
     private volatile long logId;
     private volatile State state;
 
-    public JobBehavior(ActorContext<Command> context, long jobId, IJobHandler jobHandler) {
+    public JobBehavior(ActorContext<Command> context, long jobId, IJobHandler jobHandler, ActorRef<JobCallbackBehavior.Command> jobCallbackActor) {
         super(context);
-        this.jobHandler = context.spawn(Behaviors.setup(ctx -> new JobHandlerProxy(ctx, jobId, jobHandler)), String.valueOf(jobId));
+//        AdminBizClient client = new AdminBizClient("http://localhost:8081/xxl-job-admin/", null);
+//        Behavior<JobCallbackBehavior.Command> jobCallbackBehavior = Behaviors.setup(ctx -> new JobCallbackBehavior(ctx, client));
+//        Behavior<JobCallbackBehavior.Command> failure = Behaviors.supervise(jobCallbackBehavior).onFailure(SupervisorStrategy.restart());
+
+        this.jobHandler = context.spawn(Behaviors.setup(ctx -> new JobHandlerProxy(ctx, jobId, jobHandler, jobCallbackActor)), String.valueOf(jobId));
         this.jobHandler.tell(JobHandlerProxy.InitCommand.INSTANCE);
         this.state = State.IDLE;
     }
@@ -50,28 +48,9 @@ public class JobBehavior extends AbstractBehavior<JobBehavior.Command> {
 
     private Behavior<Command> onTrigger(TriggerCommand command) {
         this.state = State.TRIGGER;
-        TriggerParam param = command.param;
-        Duration timeout = Duration.ofDays(365L);
-        if (param.getExecutorTimeout() > 0) {
-            timeout = Duration.ofSeconds(param.getExecutorTimeout());
-        }
-        getContext().askWithStatus(
-                ReturnT.class,
-                jobHandler,
-                timeout,
-                replyTo -> new JobHandlerProxy.TriggerCommand(param, replyTo),
-                TriggerReturnTWrapper::new);
+        jobHandler.tell(new JobHandlerProxy.TriggerCommand(command.param));
         return newReceiveBuilder()
-                .onMessage(TimeoutCommand.class, this::onTimeout)
                 .onMessage(KillCommand.class, this::onKill)
-                .onMessage(StateCommand.class, this::onState)
-                .build();
-    }
-
-    private Behavior<Command> onTimeout(TimeoutCommand command) {
-        this.state = State.TIMEOUT;
-        return newReceiveBuilder()
-                .onMessage(TriggerCommand.class, this::onTrigger)
                 .onMessage(StateCommand.class, this::onState)
                 .build();
     }
@@ -109,16 +88,6 @@ public class JobBehavior extends AbstractBehavior<JobBehavior.Command> {
         }
     }
 
-    public static class TriggerReturnTWrapper implements Command {
-        private final ReturnT returnT;
-        private final Throwable throwable;
-
-        public TriggerReturnTWrapper(ReturnT returnT, Throwable throwable) {
-            this.returnT = returnT;
-            this.throwable = throwable;
-        }
-    }
-
     public static class KillCommand implements Command {
         private final long logId;
         private final long logDateTime;
@@ -133,7 +102,4 @@ public class JobBehavior extends AbstractBehavior<JobBehavior.Command> {
         }
     }
 
-    public static class TimeoutCommand implements Command {
-
-    }
 }
