@@ -12,7 +12,7 @@ import java.io.File;
 /**
  * Created by xuxueli on 17/4/27.
  */
-public class ScriptJobHandler extends IJobHandler {
+public class ScriptJobHandler implements IJobHandler {
 
     private int jobId;
     private long glueUpdatetime;

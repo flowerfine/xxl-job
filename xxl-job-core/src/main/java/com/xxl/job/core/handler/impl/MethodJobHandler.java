@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 /**
  * Method job handler.
  */
-public class MethodJobHandler extends IJobHandler {
+public class MethodJobHandler implements IJobHandler {
 
     private final Object target;
     private final Method method;
